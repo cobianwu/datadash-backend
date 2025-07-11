@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
+import { PEDueDiligence } from "@/pages/PEDueDiligence";
 import { useAuth } from "@/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -33,6 +34,7 @@ function Router() {
     <Switch>
       <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/analytics" component={() => <ProtectedRoute component={AdvancedAnalytics} />} />
+      <Route path="/due-diligence" component={() => <ProtectedRoute component={PEDueDiligence} />} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>

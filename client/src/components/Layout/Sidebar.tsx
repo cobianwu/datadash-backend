@@ -14,6 +14,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Data Sources", href: "/data-sources", icon: Database },
   { name: "Advanced Analytics", href: "/analytics", icon: LineChart },
+  { name: "Due Diligence", href: "/due-diligence", icon: Briefcase },
   { name: "Portfolio", href: "/portfolio", icon: Briefcase },
   { name: "AI Assistant", href: "/ai", icon: Brain },
   { name: "Warehouses", href: "/warehouses", icon: Server },
