@@ -1,0 +1,581 @@
+STEP 7: Server Authentication System
+Create server/auth.ts:
+
+
+Opened server/auth.ts
+
+Opened server/storage.ts
+
+Opened server/routes.ts
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import bcrypt from "bcrypt";
+import type { Express, RequestHandler } from "express";
+import { storage } from "./storage";
+import { pool } from "./db";
+// Configure session store
+export function getSession() {
+  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    pool: pool,
+    createTableIfMissing: true,
+    ttl: sessionTtl,
+    tableName: "sessions",
+  });
+  
+  return session({
+    secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      maxAge: sessionTtl,
+    },
+  });
+}
+// Configure passport local strategy
+export async function setupAuth(app: Express) {
+  app.use(getSession());
+  app.use(passport.initialize());
+  app.use(passport.session());
+  passport.use(new LocalStrategy(
+    async (username: string, password: string, done) => {
+      try {
+        const user = await storage.getUserByUsername(username);
+        if (!user) {
+          return done(null, false, { message: "Invalid username or password" });
+        }
+        const isValid = await bcrypt.compare(password, user.passwordHash);
+        if (!isValid) {
+          return done(null, false, { message: "Invalid username or password" });
+        }
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  ));
+  passport.serializeUser((user: any, done) => {
+    done(null, user.id);
+  });
+  passport.deserializeUser(async (id: number, done) => {
+    try {
+      const user = await storage.getUser(id);
+      done(null, user);
+    } catch (error) {
+      done(error);
+    }
+  });
+}
+// Authentication middleware
+export const requireAuth: RequestHandler = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Authentication required" });
+};
+// Helper to hash passwords
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
+STEP 8: Storage Layer (Memory-based)
+Create server/storage.ts:
+
+import { 
+  users, warehouses, dataSources, queryHistory, charts, dashboards, aiConversations,
+  type User, type InsertUser, type Warehouse, type InsertWarehouse,
+  type DataSource, type InsertDataSource, type QueryHistory, type InsertQueryHistory,
+  type Chart, type InsertChart, type Dashboard, type InsertDashboard,
+  type AIConversation, type InsertAIConversation
+} from "@shared/schema";
+export interface IStorage {
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  createUserWithPassword(username: string, email: string, passwordHash: string): Promise<User>;
+  // Warehouse operations
+  getUserWarehouses(userId: number): Promise<Warehouse[]>;
+  getWarehouse(id: number): Promise<Warehouse | undefined>;
+  createWarehouse(warehouse: InsertWarehouse): Promise<Warehouse>;
+  updateWarehouse(id: number, updates: Partial<Warehouse>): Promise<Warehouse | undefined>;
+  deleteWarehouse(id: number): Promise<boolean>;
+  // Data source operations
+  getUserDataSources(userId: number): Promise<DataSource[]>;
+  getDataSource(id: number): Promise<DataSource | undefined>;
+  createDataSource(dataSource: InsertDataSource): Promise<DataSource>;
+  updateDataSource(id: number, updates: Partial<DataSource>): Promise<DataSource | undefined>;
+  deleteDataSource(id: number): Promise<boolean>;
+  // Query history operations
+  getUserQueryHistory(userId: number): Promise<QueryHistory[]>;
+  createQueryHistory(query: InsertQueryHistory): Promise<QueryHistory>;
+  // Chart operations
+  getUserCharts(userId: number): Promise<Chart[]>;
+  getChart(id: number): Promise<Chart | undefined>;
+  createChart(chart: InsertChart): Promise<Chart>;
+  updateChart(id: number, updates: Partial<Chart>): Promise<Chart | undefined>;
+  deleteChart(id: number): Promise<boolean>;
+  // Dashboard operations
+  getUserDashboards(userId: number): Promise<Dashboard[]>;
+  getDashboard(id: number): Promise<Dashboard | undefined>;
+  createDashboard(dashboard: InsertDashboard): Promise<Dashboard>;
+  updateDashboard(id: number, updates: Partial<Dashboard>): Promise<Dashboard | undefined>;
+  deleteDashboard(id: number): Promise<boolean>;
+  // AI conversation operations
+  getUserConversations(userId: number): Promise<AIConversation[]>;
+  getConversation(id: number): Promise<AIConversation | undefined>;
+  createConversation(conversation: InsertAIConversation): Promise<AIConversation>;
+  updateConversation(id: number, updates: Partial<AIConversation>): Promise<AIConversation | undefined>;
+}
+export class MemStorage implements IStorage {
+  private users: Map<number, User> = new Map();
+  private warehouses: Map<number, Warehouse> = new Map();
+  private dataSources: Map<number, DataSource> = new Map();
+  private queryHistory: Map<number, QueryHistory> = new Map();
+  private charts: Map<number, Chart> = new Map();
+  private dashboards: Map<number, Dashboard> = new Map();
+  private aiConversations: Map<number, AIConversation> = new Map();
+  
+  private currentId: { [key: string]: number } = {
+    users: 1,
+    warehouses: 1,
+    dataSources: 1,
+    queryHistory: 1,
+    charts: 1,
+    dashboards: 1,
+    aiConversations: 1,
+  };
+  constructor() {
+    this.initializeDefaultData();
+  }
+  private initializeDefaultData() {
+    // Create default warehouses
+    const defaultWarehouses: Warehouse[] = [
+      {
+        id: 1,
+        name: "ANALYTICS_WH",
+        size: "Large",
+        status: "running",
+        creditsPerHour: "8.000",
+        nodes: 8,
+        autoSuspend: true,
+        userId: 1,
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        name: "ETL_WH",
+        size: "X-Large",
+        status: "suspended",
+        creditsPerHour: "16.000",
+        nodes: 16,
+        autoSuspend: true,
+        userId: 1,
+        createdAt: new Date(),
+      },
+    ];
+    defaultWarehouses.forEach(wh => this.warehouses.set(wh.id, wh));
+    this.currentId.warehouses = 3;
+  }
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
+  }
+  async createUserWithPassword(username: string, email: string, passwordHash: string): Promise<User> {
+    const id = ++this.currentId.users;
+    const user: User = {
+      id,
+      username,
+      email,
+      passwordHash,
+      firstName: null,
+      lastName: null,
+      role: "user",
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentId.users++;
+    const user: User = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
+  }
+  // Warehouse operations
+  async getUserWarehouses(userId: number): Promise<Warehouse[]> {
+    return Array.from(this.warehouses.values()).filter(wh => wh.userId === userId);
+  }
+  async getWarehouse(id: number): Promise<Warehouse | undefined> {
+    return this.warehouses.get(id);
+  }
+  async createWarehouse(insertWarehouse: InsertWarehouse): Promise<Warehouse> {
+    const id = this.currentId.warehouses++;
+    const warehouse: Warehouse = {
+      ...insertWarehouse,
+      id,
+      createdAt: new Date(),
+      status: insertWarehouse.status || 'running',
+      autoSuspend: insertWarehouse.autoSuspend ?? true,
+      userId: insertWarehouse.userId || 1
+    };
+    this.warehouses.set(id, warehouse);
+    return warehouse;
+  }
+  async updateWarehouse(id: number, updates: Partial<Warehouse>): Promise<Warehouse | undefined> {
+    const warehouse = this.warehouses.get(id);
+    if (!warehouse) return undefined;
+    
+    const updated = { ...warehouse, ...updates };
+    this.warehouses.set(id, updated);
+    return updated;
+  }
+  async deleteWarehouse(id: number): Promise<boolean> {
+    return this.warehouses.delete(id);
+  }
+  // Data source operations
+  async getUserDataSources(userId: number): Promise<DataSource[]> {
+    return Array.from(this.dataSources.values()).filter(ds => ds.userId === userId);
+  }
+  async getDataSource(id: number): Promise<DataSource | undefined> {
+    return this.dataSources.get(id);
+  }
+  async createDataSource(insertDataSource: InsertDataSource): Promise<DataSource> {
+    const id = this.currentId.dataSources++;
+    const dataSource: DataSource = {
+      ...insertDataSource,
+      id,
+      createdAt: new Date(),
+      status: insertDataSource.status || 'ready',
+      userId: insertDataSource.userId || 1,
+      schema: insertDataSource.schema || {},
+      fileName: insertDataSource.fileName || null,
+      filePath: insertDataSource.filePath || null,
+      rowCount: insertDataSource.rowCount || 0
+    };
+    this.dataSources.set(id, dataSource);
+    return dataSource;
+  }
+  async updateDataSource(id: number, updates: Partial<DataSource>): Promise<DataSource | undefined> {
+    const dataSource = this.dataSources.get(id);
+    if (!dataSource) return undefined;
+    
+    const updated = { ...dataSource, ...updates };
+    this.dataSources.set(id, updated);
+    return updated;
+  }
+  async deleteDataSource(id: number): Promise<boolean> {
+    return this.dataSources.delete(id);
+  }
+  // Query history operations
+  async getUserQueryHistory(userId: number): Promise<QueryHistory[]> {
+    return Array.from(this.queryHistory.values())
+      .filter(qh => qh.userId === userId)
+      .sort((a, b) => (b.executedAt?.getTime() || 0) - (a.executedAt?.getTime() || 0));
+  }
+  async createQueryHistory(insertQuery: InsertQueryHistory): Promise<QueryHistory> {
+    const id = this.currentId.queryHistory++;
+    const query: QueryHistory = {
+      ...insertQuery,
+      id,
+      executedAt: new Date(),
+      userId: insertQuery.userId || 1,
+      warehouseId: insertQuery.warehouseId || 1,
+      duration: insertQuery.duration || null,
+      rowsReturned: insertQuery.rowsReturned || null,
+      creditsUsed: insertQuery.creditsUsed || null
+    };
+    this.queryHistory.set(id, query);
+    return query;
+  }
+  // Chart operations
+  async getUserCharts(userId: number): Promise<Chart[]> {
+    return Array.from(this.charts.values()).filter(chart => chart.userId === userId);
+  }
+  async getChart(id: number): Promise<Chart | undefined> {
+    return this.charts.get(id);
+  }
+  async createChart(insertChart: InsertChart): Promise<Chart> {
+    const id = this.currentId.charts++;
+    const chart: Chart = {
+      ...insertChart,
+      id,
+      createdAt: new Date(),
+      userId: insertChart.userId || 1,
+      dataSourceId: insertChart.dataSourceId || null
+    };
+    this.charts.set(id, chart);
+    return chart;
+  }
+  async updateChart(id: number, updates: Partial<Chart>): Promise<Chart | undefined> {
+    const chart = this.charts.get(id);
+    if (!chart) return undefined;
+    
+    const updated = { ...chart, ...updates };
+    this.charts.set(id, updated);
+    return updated;
+  }
+  async deleteChart(id: number): Promise<boolean> {
+    return this.charts.delete(id);
+  }
+  // Dashboard operations
+  async getUserDashboards(userId: number): Promise<Dashboard[]> {
+    return Array.from(this.dashboards.values()).filter(dashboard => dashboard.userId === userId);
+  }
+  async getDashboard(id: number): Promise<Dashboard | undefined> {
+    return this.dashboards.get(id);
+  }
+  async createDashboard(insertDashboard: InsertDashboard): Promise<Dashboard> {
+    const id = this.currentId.dashboards++;
+    const dashboard: Dashboard = {
+      ...insertDashboard,
+      id,
+      createdAt: new Date(),
+      userId: insertDashboard.userId || 1
+    };
+    this.dashboards.set(id, dashboard);
+    return dashboard;
+  }
+  async updateDashboard(id: number, updates: Partial<Dashboard>): Promise<Dashboard | undefined> {
+    const dashboard = this.dashboards.get(id);
+    if (!dashboard) return undefined;
+    
+    const updated = { ...dashboard, ...updates };
+    this.dashboards.set(id, updated);
+    return updated;
+  }
+  async deleteDashboard(id: number): Promise<boolean> {
+    return this.dashboards.delete(id);
+  }
+  // AI conversation operations
+  async getUserConversations(userId: number): Promise<AIConversation[]> {
+    return Array.from(this.aiConversations.values()).filter(conversation => conversation.userId === userId);
+  }
+  async getConversation(id: number): Promise<AIConversation | undefined> {
+    return this.aiConversations.get(id);
+  }
+  async createConversation(insertConversation: InsertAIConversation): Promise<AIConversation> {
+    const id = this.currentId.aiConversations++;
+    const conversation: AIConversation = {
+      ...insertConversation,
+      id,
+      createdAt: new Date(),
+      userId: insertConversation.userId || 1
+    };
+    this.aiConversations.set(id, conversation);
+    return conversation;
+  }
+  async updateConversation(id: number, updates: Partial<AIConversation>): Promise<AIConversation | undefined> {
+    const conversation = this.aiConversations.get(id);
+    if (!conversation) return undefined;
+    
+    const updated = { ...conversation, ...updates };
+    this.aiConversations.set(id, updated);
+    return updated;
+  }
+}
+export const storage = new MemStorage();
+STEP 9: Service Files
+Create server/services/fileProcessor.ts:
+
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
+export interface ProcessedFile {
+  name: string;
+  type: string;
+  schema: Record<string, any>;
+  rowCount: number;
+  data?: any[];
+}
+export class FileProcessor {
+  static upload = multer({
+    dest: 'uploads/',
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = /\.(csv|xlsx?|json|parquet)$/i;
+      if (allowedTypes.test(file.originalname)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only CSV, Excel, JSON, and Parquet files are allowed'));
+      }
+    }
+  });
+  static async processFile(filePath: string, originalName: string): Promise<ProcessedFile> {
+    const ext = path.extname(originalName).toLowerCase();
+    
+    switch (ext) {
+      case '.csv':
+        return this.processCSV(filePath, originalName);
+      case '.xlsx':
+      case '.xls':
+        return this.processExcel(filePath, originalName);
+      case '.json':
+        return this.processJSON(filePath, originalName);
+      default:
+        throw new Error(`Unsupported file type: ${ext}`);
+    }
+  }
+  private static async processCSV(filePath: string, originalName: string): Promise<ProcessedFile> {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const parsed = Papa.parse(content, { header: true, skipEmptyLines: true });
+    
+    const schema = this.inferSchema(parsed.data);
+    
+    return {
+      name: path.basename(originalName, path.extname(originalName)),
+      type: 'csv',
+      schema,
+      rowCount: parsed.data.length,
+      data: parsed.data.slice(0, 100) // First 100 rows for preview
+    };
+  }
+  private static async processExcel(filePath: string, originalName: string): Promise<ProcessedFile> {
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(sheet);
+    
+    const schema = this.inferSchema(data);
+    
+    return {
+      name: path.basename(originalName, path.extname(originalName)),
+      type: 'excel',
+      schema,
+      rowCount: data.length,
+      data: data.slice(0, 100)
+    };
+  }
+  private static async processJSON(filePath: string, originalName: string): Promise<ProcessedFile> {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const data = JSON.parse(content);
+    
+    const arrayData = Array.isArray(data) ? data : [data];
+    const schema = this.inferSchema(arrayData);
+    
+    return {
+      name: path.basename(originalName, path.extname(originalName)),
+      type: 'json',
+      schema,
+      rowCount: arrayData.length,
+      data: arrayData.slice(0, 100)
+    };
+  }
+  private static inferSchema(data: any[]): Record<string, any> {
+    if (!data || data.length === 0) return {};
+    
+    const schema: Record<string, any> = {};
+    const sample = data[0];
+    
+    Object.keys(sample).forEach(key => {
+      const value = sample[key];
+      schema[key] = {
+        type: this.inferType(value),
+        nullable: true
+      };
+    });
+    
+    return schema;
+  }
+  private static inferType(value: any): string {
+    if (value === null || value === undefined) return 'string';
+    if (typeof value === 'number') return 'number';
+    if (typeof value === 'boolean') return 'boolean';
+    if (value instanceof Date) return 'date';
+    if (typeof value === 'string') {
+      if (!isNaN(Date.parse(value))) return 'date';
+      if (!isNaN(Number(value))) return 'number';
+    }
+    return 'string';
+  }
+}
+Create server/services/ai.ts:
+
+import OpenAI from "openai";
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+export async function processAIQuery(query: string, context?: any): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are a business intelligence assistant. Help users analyze data and create insights."
+        },
+        {
+          role: "user",
+          content: query
+        }
+      ],
+      max_tokens: 1000
+    });
+    return response.choices[0]?.message?.content || "No response generated";
+  } catch (error) {
+    console.error("AI processing error:", error);
+    return "AI processing temporarily unavailable. Please try again later.";
+  }
+}
+export async function generateSQLFromNaturalLanguage(query: string, schema?: any): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are a SQL expert. Convert natural language queries to SQL.
+          Schema context: ${JSON.stringify(schema || {})}`
+        },
+        {
+          role: "user",
+          content: query
+        }
+      ],
+      max_tokens: 500
+    });
+    return response.choices[0]?.message?.content || "SELECT 1;";
+  } catch (error) {
+    console.error("SQL generation error:", error);
+    return "SELECT 1; -- AI temporarily unavailable";
+  }
+}
+export async function generateChartFromDescription(description: string, data?: any): Promise<any> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "Generate chart configuration in JSON format based on the description."
+        },
+        {
+          role: "user",
+          content: description
+        }
+      ],
+      max_tokens: 500
+    });
+    const content = response.choices[0]?.message?.content || "{}";
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Chart generation error:", error);
+    return { type: "bar", data: [], config: {} };
+  }
+}
+Should I continue with the remaining server files and then move to the frontend components? We still need the database connection, security, SQL parser, routes completion, Vite setup, and the complete frontend structure.
+
+
+Scroll to latest

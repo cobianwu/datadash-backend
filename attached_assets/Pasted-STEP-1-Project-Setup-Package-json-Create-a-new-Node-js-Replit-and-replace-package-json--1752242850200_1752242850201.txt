@@ -1,0 +1,404 @@
+STEP 1: Project Setup & Package.json
+Create a new Node.js Replit and replace package.json:
+
+{
+  "name": "dataflow-analytics",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "NODE_ENV=development tsx server/index.ts",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "NODE_ENV=production node dist/index.js",
+    "check": "tsc",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@neondatabase/serverless": "^0.10.4",
+    "@radix-ui/react-accordion": "^1.2.4",
+    "@radix-ui/react-alert-dialog": "^1.1.7",
+    "@radix-ui/react-avatar": "^1.1.4",
+    "@radix-ui/react-checkbox": "^1.1.5",
+    "@radix-ui/react-dialog": "^1.1.7",
+    "@radix-ui/react-dropdown-menu": "^2.1.7",
+    "@radix-ui/react-label": "^2.1.3",
+    "@radix-ui/react-popover": "^1.1.7",
+    "@radix-ui/react-select": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.3",
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-tabs": "^1.1.4",
+    "@radix-ui/react-toast": "^1.2.7",
+    "@radix-ui/react-tooltip": "^1.2.0",
+    "@tanstack/react-query": "^5.60.5",
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "4.17.21",
+    "@types/express-session": "^1.18.2",
+    "@types/multer": "^2.0.0",
+    "@types/node": "20.16.11",
+    "@types/passport": "^1.0.17",
+    "@types/passport-local": "^1.0.38",
+    "@types/papaparse": "^5.3.16",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "bcrypt": "^6.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "connect-pg-simple": "^10.0.0",
+    "drizzle-orm": "^0.39.1",
+    "drizzle-zod": "^0.7.0",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "lucide-react": "^0.453.0",
+    "multer": "^2.0.1",
+    "openai": "^5.9.0",
+    "papaparse": "^5.5.3",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.55.0",
+    "recharts": "^2.15.2",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "wouter": "^3.3.5",
+    "xlsx": "^0.18.5",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@replit/vite-plugin-cartographer": "^0.2.7",
+    "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
+    "@tailwindcss/vite": "^4.1.3",
+    "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.20",
+    "drizzle-kit": "^0.30.4",
+    "esbuild": "^0.25.0",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.1",
+    "typescript": "5.6.3",
+    "vite": "^5.4.19"
+  }
+}
+STEP 2: Vite Configuration
+Create vite.config.ts:
+
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+export default defineConfig({
+  plugins: [
+    react(),
+    runtimeErrorOverlay(),
+    ...(process.env.NODE_ENV !== "production" &&
+    process.env.REPL_ID !== undefined
+      ? [
+          await import("@replit/vite-plugin-cartographer").then((m) =>
+            m.cartographer(),
+          ),
+        ]
+      : []),
+  ],
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+    },
+  },
+  root: path.resolve(import.meta.dirname, "client"),
+  build: {
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    emptyOutDir: true,
+  },
+  server: {
+    fs: {
+      strict: true,
+      deny: ["**/.*"],
+    },
+  },
+});
+STEP 3: TypeScript Configuration
+Create tsconfig.json:
+
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./client/src/*"],
+      "@shared/*": ["./shared/*"],
+      "@assets/*": ["./attached_assets/*"]
+    }
+  },
+  "include": ["vite.config.ts", "server/**/*", "client/**/*", "shared/**/*"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+Create tsconfig.node.json:
+
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+STEP 4: Tailwind Configuration
+Create tailwind.config.ts:
+
+import type { Config } from "tailwindcss";
+export default {
+  darkMode: ["class"],
+  content: [
+    "./client/src/**/*.{js,ts,jsx,tsx}",
+    "./client/index.html",
+  ],
+  theme: {
+    extend: {
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      colors: {},
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config;
+Create postcss.config.js:
+
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+STEP 5: Database Schema
+Create shared/schema.ts (this is the complete schema I showed you earlier - it's quite long, so I'll give you the essential parts):
+
+
+Opened shared/schema.ts
+Here's the complete shared/schema.ts file for the database schema (copy this entirely):
+
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, decimal } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+// Session storage table for authentication
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: text("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  }
+);
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  email: text("email").unique(),
+  passwordHash: text("password_hash").notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  role: text("role").default("user"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const warehouses = pgTable("warehouses", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  size: text("size").notNull(),
+  status: text("status").notNull().default("suspended"),
+  creditsPerHour: decimal("credits_per_hour", { precision: 10, scale: 3 }).notNull(),
+  nodes: integer("nodes").notNull(),
+  autoSuspend: boolean("auto_suspend").notNull().default(true),
+  userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const dataSources = pgTable("data_sources", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // csv, excel, json, parquet, database
+  fileName: text("file_name"),
+  filePath: text("file_path"),
+  schema: jsonb("schema"), // Column definitions and types
+  rowCount: integer("row_count").default(0),
+  status: text("status").notNull().default("processing"), // processing, ready, error
+  userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const queryHistory = pgTable("query_history", {
+  id: serial("id").primaryKey(),
+  sqlQuery: text("sql_query").notNull(),
+  status: text("status").notNull(), // running, completed, error
+  duration: integer("duration"), // milliseconds
+  rowsReturned: integer("rows_returned"),
+  creditsUsed: decimal("credits_used", { precision: 10, scale: 6 }),
+  warehouseId: integer("warehouse_id").references(() => warehouses.id),
+  userId: integer("user_id").references(() => users.id),
+  executedAt: timestamp("executed_at").defaultNow(),
+});
+export const charts = pgTable("charts", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // bar, line, pie, scatter, heatmap, treemap
+  configuration: jsonb("configuration").notNull(), // Chart config including axes, colors, etc.
+  dataSourceId: integer("data_source_id").references(() => dataSources.id),
+  userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const dashboards = pgTable("dashboards", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  layout: jsonb("layout").notNull(), // Dashboard layout configuration
+  userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+export const aiConversations = pgTable("ai_conversations", {
+  id: serial("id").primaryKey(),
+  messages: jsonb("messages").notNull(), // Array of conversation messages
+  context: jsonb("context"), // Current data context for AI
+  userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+// Private Equity Specific Tables
+export const companies = pgTable("companies", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  sector: text("sector").notNull(),
+  region: text("region").notNull(),
+  foundedDate: timestamp("founded_date"),
+  employees: integer("employees"),
+  revenue: decimal("revenue", { precision: 15, scale: 2 }),
+  ebitda: decimal("ebitda", { precision: 15, scale: 2 }),
+  netIncome: decimal("net_income", { precision: 15, scale: 2 }),
+  totalAssets: decimal("total_assets", { precision: 15, scale: 2 }),
+  totalDebt: decimal("total_debt", { precision: 15, scale: 2 }),
+  equity: decimal("equity", { precision: 15, scale: 2 }),
+  marketCap: decimal("market_cap", { precision: 15, scale: 2 }),
+  description: text("description"),
+  stage: text("stage"), // seed, series_a, series_b, growth, mature
+  userId: integer("user_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+// Insert schemas
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+export const insertWarehouseSchema = createInsertSchema(warehouses).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertDataSourceSchema = createInsertSchema(dataSources).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertQueryHistorySchema = createInsertSchema(queryHistory).omit({
+  id: true,
+  executedAt: true,
+});
+export const insertChartSchema = createInsertSchema(charts).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertDashboardSchema = createInsertSchema(dashboards).omit({
+  id: true,
+  createdAt: true,
+});
+export const insertAIConversationSchema = createInsertSchema(aiConversations).omit({
+  id: true,
+  createdAt: true,
+});
+// Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Warehouse = typeof warehouses.$inferSelect;
+export type InsertWarehouse = z.infer<typeof insertWarehouseSchema>;
+export type DataSource = typeof dataSources.$inferSelect;
+export type InsertDataSource = z.infer<typeof insertDataSourceSchema>;
+export type QueryHistory = typeof queryHistory.$inferSelect;
+export type InsertQueryHistory = z.infer<typeof insertQueryHistorySchema>;
+export type Chart = typeof charts.$inferSelect;
+export type InsertChart = z.infer<typeof insertChartSchema>;
+export type Dashboard = typeof dashboards.$inferSelect;
+export type InsertDashboard = z.infer<typeof insertDashboardSchema>;
+export type AIConversation = typeof aiConversations.$inferSelect;
+export type InsertAIConversation = z.infer<typeof insertAIConversationSchema>;
+STEP 6: Server Files
+Create server/index.ts:
+
+import express, { type Request, Response, NextFunction } from "express";
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+      log(logLine);
+    }
+  });
+  next();
+});
+(async () => {
+  const server = await registerRoutes(app);
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+    res.status(status).json({ message });
+    throw err;
+  });
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+  const port = parseInt(process.env.PORT || '5000', 10);
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
+  });
+})();
+Would you like me to continue with the next components (authentication, storage, routes, and frontend)? I have about 10-15 more files to share with you to complete the replication. Let me know and I'll continue step by step!
+
+
+Scroll
