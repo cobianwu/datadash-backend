@@ -13,6 +13,7 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
   const { toast } = useToast();
 
   const generatePowerPoint = async () => {
+    console.log("PowerPoint export started...");
     try {
       const pptx = new PptxGenJS();
       
@@ -392,6 +393,7 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
 
       // Save the presentation
       const fileName = `${company?.name || 'Company'}_Investment_Analysis_${new Date().toISOString().split('T')[0]}.pptx`;
+      console.log("Saving PowerPoint file:", fileName);
       await pptx.writeFile({ fileName });
 
       toast({

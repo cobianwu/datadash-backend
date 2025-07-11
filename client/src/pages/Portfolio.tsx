@@ -9,6 +9,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { ExcelExport } from "@/components/ExcelExport";
 import { PDFExport } from "@/components/PDFExport";
 import { PowerPointExport } from "@/components/PowerPointExport";
+import { Button } from "@/components/ui/button";
 
 export default function Portfolio() {
   const { data: companies, isLoading } = useQuery({
@@ -69,6 +70,28 @@ export default function Portfolio() {
 
         {/* Export Options */}
         <div className="flex gap-3 justify-end">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              console.log("Testing basic download...");
+              try {
+                const blob = new Blob(['Test download content'], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'test-download.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                console.log("Test download completed");
+              } catch (err) {
+                console.error("Test download failed:", err);
+              }
+            }}
+          >
+            Test Download
+          </Button>
           <ExcelExport 
             fileName="Portfolio_Overview"
             data={companies}

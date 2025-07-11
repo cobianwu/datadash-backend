@@ -26,6 +26,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
   const { toast } = useToast();
 
   const generatePDF = async () => {
+    console.log("PDF export started...");
     try {
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -329,6 +330,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
 
       // Save the PDF
       const pdfFileName = `${fileName}_${new Date().toISOString().split('T')[0]}.pdf`;
+      console.log("Saving PDF file:", pdfFileName);
       pdf.save(pdfFileName);
 
       toast({
