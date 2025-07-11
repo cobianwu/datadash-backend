@@ -7,7 +7,8 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Removed duplicate apiRequest - use the one from api.ts instead
+// Re-export apiRequest for convenience
+export { apiRequest } from "./api";
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {

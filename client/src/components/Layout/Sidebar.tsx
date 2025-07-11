@@ -45,16 +45,17 @@ export function Sidebar() {
             <Link 
               key={item.name} 
               href={item.href}
-              className={`
+            >
+              <div className={`
                 flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors
                 ${isCurrent 
                   ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' 
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }
-              `}
-            >
-              <Icon className="w-5 h-5" />
-              <span className={isCurrent ? "font-medium" : ""}>{item.name}</span>
+              `}>
+                <Icon className="w-5 h-5" />
+                <span className={isCurrent ? "font-medium" : ""}>{item.name}</span>
+              </div>
             </Link>
           );
         })}
