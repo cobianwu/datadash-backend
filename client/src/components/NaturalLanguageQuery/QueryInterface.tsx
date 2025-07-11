@@ -16,7 +16,7 @@ import {
   Target
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/api";
 
 interface QueryResult {
   sql: string;
