@@ -33,9 +33,10 @@ The application follows a modern full-stack architecture with clear separation b
 
 ### Database Layer
 - **ORM**: Drizzle ORM for type-safe database operations
-- **Database**: PostgreSQL (configured for Neon serverless)
-- **Migrations**: Drizzle Kit for schema management
-- **Connection**: Neon serverless driver for edge compatibility
+- **Database**: PostgreSQL (Neon serverless) - ACTIVE AND CONNECTED (as of July 11, 2025)
+- **Migrations**: Drizzle Kit for schema management (db:push command)
+- **Connection**: Neon serverless driver with WebSocket support
+- **Storage**: DatabaseStorage implementation replaces MemStorage for persistence
 
 ## Key Components
 

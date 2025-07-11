@@ -5,6 +5,8 @@ import {
   type Chart, type InsertChart, type Dashboard, type InsertDashboard,
   type AIConversation, type InsertAIConversation, type Company, type InsertCompany
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -481,4 +483,227 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Switch between MemStorage and DatabaseStorage
+// For now, let's create the DatabaseStorage class
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async createUserWithPassword(username: string, email: string, passwordHash: string): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({ username, email, passwordHash })
+      .returning();
+    return user;
+  }
+
+  async getUserWarehouses(userId: number): Promise<Warehouse[]> {
+    return await db.select().from(warehouses).where(eq(warehouses.userId, userId));
+  }
+
+  async getWarehouse(id: number): Promise<Warehouse | undefined> {
+    const [warehouse] = await db.select().from(warehouses).where(eq(warehouses.id, id));
+    return warehouse || undefined;
+  }
+
+  async createWarehouse(insertWarehouse: InsertWarehouse): Promise<Warehouse> {
+    const [warehouse] = await db
+      .insert(warehouses)
+      .values(insertWarehouse)
+      .returning();
+    return warehouse;
+  }
+
+  async updateWarehouse(id: number, updates: Partial<Warehouse>): Promise<Warehouse | undefined> {
+    const [warehouse] = await db
+      .update(warehouses)
+      .set(updates)
+      .where(eq(warehouses.id, id))
+      .returning();
+    return warehouse || undefined;
+  }
+
+  async deleteWarehouse(id: number): Promise<boolean> {
+    const result = await db.delete(warehouses).where(eq(warehouses.id, id));
+    return true;
+  }
+
+  async getUserDataSources(userId: number): Promise<DataSource[]> {
+    return await db.select().from(dataSources).where(eq(dataSources.userId, userId));
+  }
+
+  async getDataSource(id: number): Promise<DataSource | undefined> {
+    const [dataSource] = await db.select().from(dataSources).where(eq(dataSources.id, id));
+    return dataSource || undefined;
+  }
+
+  async createDataSource(insertDataSource: InsertDataSource): Promise<DataSource> {
+    const [dataSource] = await db
+      .insert(dataSources)
+      .values(insertDataSource)
+      .returning();
+    return dataSource;
+  }
+
+  async updateDataSource(id: number, updates: Partial<DataSource>): Promise<DataSource | undefined> {
+    const [dataSource] = await db
+      .update(dataSources)
+      .set(updates)
+      .where(eq(dataSources.id, id))
+      .returning();
+    return dataSource || undefined;
+  }
+
+  async deleteDataSource(id: number): Promise<boolean> {
+    await db.delete(dataSources).where(eq(dataSources.id, id));
+    return true;
+  }
+
+  async getUserQueryHistory(userId: number): Promise<QueryHistory[]> {
+    return await db.select().from(queryHistory).where(eq(queryHistory.userId, userId));
+  }
+
+  async createQueryHistory(insertQuery: InsertQueryHistory): Promise<QueryHistory> {
+    const [query] = await db
+      .insert(queryHistory)
+      .values(insertQuery)
+      .returning();
+    return query;
+  }
+
+  async getUserCharts(userId: number): Promise<Chart[]> {
+    return await db.select().from(charts).where(eq(charts.userId, userId));
+  }
+
+  async getChart(id: number): Promise<Chart | undefined> {
+    const [chart] = await db.select().from(charts).where(eq(charts.id, id));
+    return chart || undefined;
+  }
+
+  async createChart(insertChart: InsertChart): Promise<Chart> {
+    const [chart] = await db
+      .insert(charts)
+      .values(insertChart)
+      .returning();
+    return chart;
+  }
+
+  async updateChart(id: number, updates: Partial<Chart>): Promise<Chart | undefined> {
+    const [chart] = await db
+      .update(charts)
+      .set(updates)
+      .where(eq(charts.id, id))
+      .returning();
+    return chart || undefined;
+  }
+
+  async deleteChart(id: number): Promise<boolean> {
+    await db.delete(charts).where(eq(charts.id, id));
+    return true;
+  }
+
+  async getUserDashboards(userId: number): Promise<Dashboard[]> {
+    return await db.select().from(dashboards).where(eq(dashboards.userId, userId));
+  }
+
+  async getDashboard(id: number): Promise<Dashboard | undefined> {
+    const [dashboard] = await db.select().from(dashboards).where(eq(dashboards.id, id));
+    return dashboard || undefined;
+  }
+
+  async createDashboard(insertDashboard: InsertDashboard): Promise<Dashboard> {
+    const [dashboard] = await db
+      .insert(dashboards)
+      .values(insertDashboard)
+      .returning();
+    return dashboard;
+  }
+
+  async updateDashboard(id: number, updates: Partial<Dashboard>): Promise<Dashboard | undefined> {
+    const [dashboard] = await db
+      .update(dashboards)
+      .set(updates)
+      .where(eq(dashboards.id, id))
+      .returning();
+    return dashboard || undefined;
+  }
+
+  async deleteDashboard(id: number): Promise<boolean> {
+    await db.delete(dashboards).where(eq(dashboards.id, id));
+    return true;
+  }
+
+  async getUserConversations(userId: number): Promise<AIConversation[]> {
+    return await db.select().from(aiConversations).where(eq(aiConversations.userId, userId));
+  }
+
+  async getConversation(id: number): Promise<AIConversation | undefined> {
+    const [conversation] = await db.select().from(aiConversations).where(eq(aiConversations.id, id));
+    return conversation || undefined;
+  }
+
+  async createConversation(insertConversation: InsertAIConversation): Promise<AIConversation> {
+    const [conversation] = await db
+      .insert(aiConversations)
+      .values(insertConversation)
+      .returning();
+    return conversation;
+  }
+
+  async updateConversation(id: number, updates: Partial<AIConversation>): Promise<AIConversation | undefined> {
+    const [conversation] = await db
+      .update(aiConversations)
+      .set(updates)
+      .where(eq(aiConversations.id, id))
+      .returning();
+    return conversation || undefined;
+  }
+
+  async getUserCompanies(userId: number): Promise<Company[]> {
+    return await db.select().from(companies).where(eq(companies.userId, userId));
+  }
+
+  async getCompany(id: number): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    return company || undefined;
+  }
+
+  async createCompany(insertCompany: InsertCompany): Promise<Company> {
+    const [company] = await db
+      .insert(companies)
+      .values(insertCompany)
+      .returning();
+    return company;
+  }
+
+  async updateCompany(id: number, updates: Partial<Company>): Promise<Company | undefined> {
+    const [company] = await db
+      .update(companies)
+      .set(updates)
+      .where(eq(companies.id, id))
+      .returning();
+    return company || undefined;
+  }
+
+  async deleteCompany(id: number): Promise<boolean> {
+    await db.delete(companies).where(eq(companies.id, id));
+    return true;
+  }
+}
+
+export const storage = new DatabaseStorage();
