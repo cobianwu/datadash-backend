@@ -39,31 +39,17 @@ export async function setupAuth(app: Express) {
     async (username: string, password: string, done) => {
       try {
         const user = await storage.getUserByUsername(username);
-        console.log('Auth: Found user:', username, 'User object keys:', user ? Object.keys(user) : 'null');
-        
         if (!user) {
           return done(null, false, { message: "Invalid username or password" });
         }
 
-        // Drizzle converts snake_case column names to camelCase
-        const passwordHash = user.passwordHash;
-        console.log('Auth: Password hash exists:', !!passwordHash);
-        
-        if (!passwordHash) {
-          console.error('User object:', JSON.stringify(user, null, 2));
-          return done(null, false, { message: "Password hash not found" });
-        }
-
-        const isValid = await bcrypt.compare(password, passwordHash);
-        console.log('Auth: Password valid:', isValid);
-        
+        const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) {
           return done(null, false, { message: "Invalid username or password" });
         }
 
         return done(null, user);
       } catch (error) {
-        console.error('Auth error:', error);
         return done(error);
       }
     }

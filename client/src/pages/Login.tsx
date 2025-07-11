@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import { BarChart3 } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -30,6 +32,11 @@ export default function Login() {
         : formData;
 
       await apiRequest("POST", endpoint, data);
+      
+      if (isLogin) {
+        // Invalidate the user query to refresh authentication state
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      }
       
       toast({
         title: isLogin ? "Login successful" : "Account created",
