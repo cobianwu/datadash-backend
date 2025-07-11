@@ -6,6 +6,8 @@ import { Download, FileSpreadsheet, TrendingUp, DollarSign, Users, Target, Alert
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ScatterChart, Scatter } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PowerPointExport } from "@/components/PowerPointExport";
+import { ExcelExport } from "@/components/ExcelExport";
+import { PDFExport } from "@/components/PDFExport";
 
 // Sample data from our uploaded CSV
 const revenueData = [
@@ -62,11 +64,39 @@ export function PEDueDiligence() {
           <p className="text-muted-foreground">10-Year Historical Performance & Investment Thesis</p>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline">
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
-            Export to Excel
-          </Button>
-          <PowerPointExport slides={[]} />
+          <ExcelExport 
+            fileName="CloudTech_SaaS_Due_Diligence"
+            company={{
+              name: "CloudTech SaaS",
+              industry: "Technology",
+              revenue: 163910250,
+              growthRate: 79.6,
+              valuation: 4200000000,
+              stage: "Series C"
+            }}
+            data={revenueData}
+          />
+          <PDFExport 
+            fileName="CloudTech_SaaS_Investment_Analysis"
+            company={{
+              name: "CloudTech SaaS",
+              industry: "Technology",
+              revenue: 163910250,
+              growthRate: 79.6,
+              valuation: 4200000000,
+              stage: "Series C"
+            }}
+          />
+          <PowerPointExport 
+            company={{
+              name: "CloudTech SaaS",
+              industry: "Technology",
+              revenue: 163910250,
+              growthRate: 79.6,
+              valuation: 4200000000,
+              stage: "Series C"
+            }}
+          />
         </div>
       </div>
 

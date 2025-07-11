@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, TrendingUp, TrendingDown, Calendar, DollarSign, Users, Target, Activity } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
+import { ExcelExport } from "@/components/ExcelExport";
+import { PDFExport } from "@/components/PDFExport";
+import { PowerPointExport } from "@/components/PowerPointExport";
 
 export default function Portfolio() {
   const { data: companies, isLoading } = useQuery({
@@ -62,6 +65,31 @@ export default function Portfolio() {
           <Badge variant="secondary" className="text-sm">
             Last updated: {new Date().toLocaleDateString()}
           </Badge>
+        </div>
+
+        {/* Export Options */}
+        <div className="flex gap-3 justify-end">
+          <ExcelExport 
+            fileName="Portfolio_Overview"
+            data={companies}
+          />
+          <PDFExport 
+            fileName="Portfolio_Analysis"
+            company={{
+              name: "Portfolio Overview",
+              revenue: portfolioSummary.totalRevenue,
+              valuation: portfolioSummary.totalValue,
+              growthRate: portfolioSummary.avgGrowth
+            }}
+          />
+          <PowerPointExport 
+            company={{
+              name: "Portfolio Overview",
+              revenue: portfolioSummary.totalRevenue,
+              valuation: portfolioSummary.totalValue,
+              growthRate: portfolioSummary.avgGrowth
+            }}
+          />
         </div>
 
         {/* Summary Cards */}
