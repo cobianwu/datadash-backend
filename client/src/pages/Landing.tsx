@@ -20,60 +20,60 @@ export default function Landing() {
   const features = [
     {
       icon: Brain,
-      title: "AI-Powered Analytics",
-      description: "Natural language queries transform into actionable insights. Ask questions in plain English and get instant analysis."
+      title: "Automated Due Diligence",
+      description: "Streamline financial and operational diligence. Organize massive datasets, identify red flags, and generate insights that would take analysts weeks to produce."
     },
     {
       icon: BarChart3,
-      title: "Real-Time KPI Tracking",
-      description: "Monitor revenue, EBITDA, customer retention, and 50+ other metrics across your entire portfolio in real-time."
+      title: "Intelligent Data Organization",
+      description: "Upload Excel, CSV, or connect data warehouses. Our AI automatically structures, cleans, and creates relationships across millions of data points."
     },
     {
       icon: Database,
-      title: "Unified Data Platform",
-      description: "Connect Snowflake, BigQuery, Excel, and more. All your data sources in one intelligent platform."
+      title: "Natural Language Analysis",
+      description: "Ask 'Show me customer churn by cohort' or 'What's driving margin compression?' Get instant charts, graphs, and actionable insights."
     },
     {
       icon: LineChart,
-      title: "Predictive Modeling",
-      description: "AI-driven forecasts help you anticipate trends and make proactive decisions before issues arise."
+      title: "One-Click IC Memos",
+      description: "Export findings directly to PowerPoint, Excel, or PDF. Generate investment committee memos and board decks with perfectly formatted charts."
     },
     {
       icon: Users,
-      title: "Portfolio-Wide View",
-      description: "See performance across all portfolio companies with drill-down capabilities to individual business units."
+      title: "Replace Manual Analysis",
+      description: "Eliminate 80% of analyst work. What takes junior resources days to compile, DataFlow delivers in minutes with greater accuracy."
     },
     {
       icon: Zap,
-      title: "Instant Reporting",
-      description: "Generate board-ready presentations and Excel reports with one click. Save hours on monthly reporting."
+      title: "Better Than Snowflake Sigma",
+      description: "Purpose-built for PE workflows. Unlike generic BI tools, we understand deal analysis, portfolio monitoring, and value creation."
     }
   ];
 
   const benefits = [
-    "Reduce reporting time by 80%",
-    "Identify operational issues 3x faster",
-    "Make data-driven decisions with confidence",
-    "Track 50+ KPIs automatically",
-    "Get AI-powered recommendations",
-    "Access from anywhere, anytime"
+    "Replace 2-3 analysts with one platform",
+    "Complete due diligence 10x faster",
+    "Generate IC memos in 15 minutes",
+    "Export directly to PowerPoint and Excel",
+    "Analyze millions of data points instantly",
+    "Zero SQL or technical skills required"
   ];
 
   const testimonials = [
     {
-      quote: "DataFlow transformed how we monitor our portfolio companies. What used to take days now takes minutes.",
+      quote: "We replaced 3 junior analysts with DataFlow. Due diligence that took a week now takes hours, and the IC memos are more comprehensive.",
       author: "Sarah Chen",
       role: "Managing Partner, Growth Equity Fund"
     },
     {
-      quote: "The AI insights alone have helped us identify over $2M in operational improvements across our companies.",
+      quote: "The ability to ask questions in plain English and get instant charts is revolutionary. It's like having a data scientist on demand.",
       author: "Michael Rodriguez",
-      role: "COO, TechCorp"
+      role: "Operating Partner, Mid-Market PE"
     },
     {
-      quote: "Finally, a BI tool that understands private equity. The customizable dashboards are game-changing.",
+      quote: "DataFlow pays for itself in the first deal. The time saved on data organization alone is worth 10x the cost.",
       author: "Jennifer Wu",
-      role: "VP Operations, Retail Holdings"
+      role: "VP Due Diligence, $5B Fund"
     }
   ];
 
@@ -106,11 +106,11 @@ export default function Landing() {
       <section className="container mx-auto px-6 py-20">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-            Business Intelligence Built for Private Equity
+            Replace Your PE Analysts & Snowflake Sigma
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Transform your portfolio data into actionable insights. Monitor KPIs, identify opportunities, 
-            and make data-driven decisions across all your companies in real-time.
+            Streamline due diligence, organize massive datasets, and generate board-ready insights in minutes. 
+            DataFlow automates the work of analysts while delivering deeper insights than traditional BI tools.
           </p>
           <div className="flex gap-4 justify-center mb-12">
             <Link href="/login">
@@ -122,7 +122,7 @@ export default function Landing() {
               <Play className="h-4 w-4" /> Watch Demo
             </Button>
           </div>
-          <p className="text-sm text-gray-500">No credit card required • 14-day free trial • Cancel anytime</p>
+          <p className="text-sm text-gray-500">Replace expensive analysts • Outperform Snowflake Sigma • Export to IC memos instantly</p>
         </div>
       </section>
 
@@ -131,20 +131,20 @@ export default function Landing() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold mb-2">500+</div>
-              <div className="text-blue-100">Portfolio Companies</div>
+              <div className="text-4xl font-bold mb-2">2 Days → 2 Hours</div>
+              <div className="text-blue-100">Due Diligence Time</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">$45B</div>
-              <div className="text-blue-100">Assets Monitored</div>
+              <div className="text-4xl font-bold mb-2">$250K+</div>
+              <div className="text-blue-100">Annual Analyst Cost Saved</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">80%</div>
-              <div className="text-blue-100">Time Saved</div>
+              <div className="text-4xl font-bold mb-2">10M+</div>
+              <div className="text-blue-100">Data Points Analyzed Daily</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">50+</div>
-              <div className="text-blue-100">KPIs Tracked</div>
+              <div className="text-4xl font-bold mb-2">15 Min</div>
+              <div className="text-blue-100">To Generate IC Memo</div>
             </div>
           </div>
         </div>
@@ -226,46 +226,201 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-4xl font-bold mb-6">Built for How PE Works</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Unlike generic BI tools, DataFlow understands the unique needs of private equity. 
-              Track portfolio company KPIs, identify value creation opportunities, and streamline reporting—all in one platform.
-            </p>
-            <div className="space-y-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
-                </div>
-              ))}
+      {/* Due Diligence Workflow Section */}
+      <section className="bg-gray-50 dark:bg-gray-900 py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl font-bold text-center mb-12">From Data Chaos to IC Memo in 4 Steps</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="text-center">
+              <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">1</span>
+              </div>
+              <h3 className="font-semibold mb-2">Upload Everything</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Excel files, data rooms, financial statements. We handle millions of rows instantly.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">2</span>
+              </div>
+              <h3 className="font-semibold mb-2">AI Organizes</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Automatic data cleaning, relationship mapping, and anomaly detection across all sources.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">3</span>
+              </div>
+              <h3 className="font-semibold mb-2">Ask Anything</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                "Show revenue by customer segment" or "What's driving working capital changes?" Get instant visuals.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">4</span>
+              </div>
+              <h3 className="font-semibold mb-2">Export Ready</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                One-click export to PowerPoint, Excel, or PDF. Perfectly formatted for IC memos and board decks.
+              </p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6">
-            <Card className="col-span-2">
-              <CardContent className="p-8 text-center">
-                <TrendingUp className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold mb-2">23%</h3>
-                <p className="text-gray-600 dark:text-gray-400">Average portfolio performance improvement</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Users className="h-10 w-10 text-green-600 mx-auto mb-3" />
-                <h3 className="text-xl font-bold mb-1">92%</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">User satisfaction</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Zap className="h-10 w-10 text-purple-600 mx-auto mb-3" />
-                <h3 className="text-xl font-bold mb-1">3x</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Faster insights</p>
-              </CardContent>
-            </Card>
+        </div>
+      </section>
+
+      {/* Comparison Section */}
+      <section className="container mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold mb-4">Why PE Firms Choose DataFlow</h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300">
+            See how we compare to traditional approaches
+          </p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle>Traditional Analyst Approach</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-1">✗</span>
+                  <span>2-3 analysts working for days</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-1">✗</span>
+                  <span>Manual Excel manipulation</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-1">✗</span>
+                  <span>Prone to human error</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-1">✗</span>
+                  <span>$250K+ annual cost per analyst</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-red-500 mt-1">✗</span>
+                  <span>Limited to working hours</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Snowflake Sigma</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-500 mt-1">~</span>
+                  <span>Generic BI tool, not PE-focused</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-500 mt-1">~</span>
+                  <span>Complex setup and maintenance</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-500 mt-1">~</span>
+                  <span>Requires technical expertise</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-500 mt-1">~</span>
+                  <span>Limited export capabilities</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-yellow-500 mt-1">~</span>
+                  <span>No IC memo generation</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-blue-600 shadow-lg">
+            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">DataFlow Advantage</span>
+            </div>
+            <CardHeader>
+              <CardTitle>DataFlow Analytics</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span>Minutes, not days</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span>AI-powered automation</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span>100% accurate calculations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span>Fraction of the cost</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span>24/7 availability</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 mt-1">✓</span>
+                  <span>Direct IC memo export</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="bg-blue-50 dark:bg-gray-800 py-20">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold mb-6">Purpose-Built for Private Equity</h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+                We understand deal flow, due diligence, and portfolio monitoring because we built DataFlow 
+                specifically for PE professionals. Every feature is designed to accelerate your workflow.
+              </p>
+              <div className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="col-span-2">
+                <CardContent className="p-8 text-center">
+                  <TrendingUp className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold mb-2">10x Faster</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Due diligence completion vs manual process</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Users className="h-10 w-10 text-green-600 mx-auto mb-3" />
+                  <h3 className="text-xl font-bold mb-1">$1M+</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Saved annually</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <Zap className="h-10 w-10 text-purple-600 mx-auto mb-3" />
+                  <h3 className="text-xl font-bold mb-1">Zero</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Technical skills needed</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
@@ -273,7 +428,7 @@ export default function Landing() {
       {/* Testimonials */}
       <section className="bg-gray-50 dark:bg-gray-900 py-20">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-12">Trusted by Leading PE Firms</h2>
+          <h2 className="text-4xl font-bold text-center mb-12">Trusted by PE Firms and Portfolio Companies</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="border-gray-200 dark:border-gray-700">

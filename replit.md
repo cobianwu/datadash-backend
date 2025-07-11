@@ -11,6 +11,8 @@ User values: Transparency about what's functional vs mocked/demo data
 Approach: Be honest about current capabilities while showing what's been built
 Platform focus: Business intelligence for PE portfolio companies, not portfolio/investment tracking
 Key insight: Dashboard should focus on operational metrics that help with business decisions, not portfolio returns
+Core value proposition: Replace PE analysts and Snowflake Sigma by automating due diligence and enabling instant IC memo generation
+Key differentiators: Natural language queries, massive dataset organization, one-click export to PowerPoint/Excel/PDF
 
 ## System Architecture
 
@@ -151,12 +153,14 @@ The architecture prioritizes developer experience with TypeScript throughout, ho
 - **Customizable Dashboard**: Added ability to add/remove widgets and customize business metrics display
 - **Business Intelligence Focus**: Transformed dashboard from portfolio tracking to operational business metrics
 - **Public Landing Page**: Professional marketing page showcasing platform capabilities
-  - Hero section with clear value proposition
-  - Feature showcase with 6 key capabilities
-  - Live demo section
-  - Customer testimonials
-  - Pricing tiers (Starter, Professional, Enterprise)
-  - Target audience: Business owners, COOs, private investors
+  - Hero section positioning DataFlow as replacement for PE analysts & Snowflake Sigma
+  - Feature showcase emphasizing due diligence automation and data organization
+  - 4-step workflow visualization (Upload → AI Organizes → Ask Anything → Export Ready)
+  - Comprehensive comparison table vs traditional analysts and Snowflake Sigma
+  - Customer testimonials from PE professionals highlighting time/cost savings
+  - Pricing tiers (Starter $999, Professional $2999, Enterprise Custom)
+  - Strong emphasis on IC memo generation and board deck exports
+  - Target audience: PE firms, operating partners, due diligence teams
 
 ### Fixes Applied
 - Fixed authentication by removing duplicate `apiRequest` functions
