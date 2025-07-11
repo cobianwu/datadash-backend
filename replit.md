@@ -7,6 +7,8 @@ DataFlow Analytics is a comprehensive business intelligence platform built as a 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+User values: Transparency about what's functional vs mocked/demo data
+Approach: Be honest about current capabilities while showing what's been built
 
 ## System Architecture
 
