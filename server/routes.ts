@@ -277,31 +277,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Query is required" });
       }
 
-      // Mock SQL generation and insights for demonstration
-      const mockResult = {
-        sql: `SELECT company_name, revenue, growth_rate 
-              FROM portfolio_companies 
-              WHERE growth_rate > 0.15 
-              ORDER BY growth_rate DESC 
-              LIMIT 10`,
-        data: [
-          { company: "TechCorp", revenue: 145, growth: 0.28 },
-          { company: "DataSoft", revenue: 89, growth: 0.35 },
-          { company: "CloudCo", revenue: 203, growth: 0.22 }
-        ],
-        insights: [
-          "Technology companies show the highest growth rates in your portfolio",
-          "3 companies are growing above 25% annually",
-          "Average revenue per high-growth company is $145M"
-        ],
-        chartSuggestions: [
-          { type: "bar", title: "Revenue by Growth Rate" },
-          { type: "scatter", title: "Revenue vs Growth Correlation" }
-        ],
-        executionTime: 142
+      const startTime = Date.now();
+
+      // Use real AI to process the query
+      const sql = await generateSQLFromNaturalLanguage(query);
+      
+      // Generate insights based on the query
+      const insights = await generateInsights([], query);
+      
+      // Suggest appropriate charts
+      const chartSuggestions = await generateChartFromDescription(query);
+
+      // For now, use mock data for the results (in production, would execute the SQL)
+      const mockData = [
+        { metric: "Revenue", value: 280341600, change: "+79.6%", period: "2024" },
+        { metric: "ARR", value: 3364099200, change: "+65.0%", period: "2024" },
+        { metric: "Customers", value: 48005, change: "+4,355", period: "Dec 2024" }
+      ];
+
+      const result = {
+        sql,
+        data: mockData,
+        insights,
+        chartSuggestions,
+        executionTime: Date.now() - startTime
       };
 
-      res.json(mockResult);
+      res.json(result);
     } catch (error) {
       console.error("AI query error:", error);
       res.status(500).json({ error: "Failed to process AI query" });

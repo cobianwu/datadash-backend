@@ -63,22 +63,29 @@ export async function generateChartFromDescription(description: string, data?: a
       messages: [
         {
           role: "system",
-          content: "Generate chart configuration in JSON format based on the description. Return a valid JSON object with type, data, and config properties. Use chart types like 'bar', 'line', 'pie', 'scatter', 'area', 'waterfall', 'treemap', etc."
+          content: "Generate chart suggestions based on the query. Return a JSON object with 'suggestions' array containing objects with 'type' and 'title' properties. Chart types can be 'bar', 'line', 'pie', 'scatter', 'area', 'waterfall', 'treemap', etc."
         },
         {
           role: "user",
-          content: `Description: ${description}\nData context: ${JSON.stringify(data)}`
+          content: `Query: ${description}\nData context: ${JSON.stringify(data)}`
         }
       ],
       max_tokens: 500,
       response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0]?.message?.content || "{}";
-    return JSON.parse(content);
+    const content = response.choices[0]?.message?.content || '{"suggestions": []}';
+    const result = JSON.parse(content);
+    return result.suggestions || [
+      { type: "bar", title: "Revenue by Category" },
+      { type: "line", title: "Growth Trend" }
+    ];
   } catch (error) {
     console.error("Chart generation error:", error);
-    return { type: "bar", data: [], config: {} };
+    return [
+      { type: "bar", title: "Revenue Analysis" },
+      { type: "scatter", title: "Correlation Analysis" }
+    ];
   }
 }
 

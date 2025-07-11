@@ -9,6 +9,8 @@ import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 import { PEDueDiligence } from "@/pages/PEDueDiligence";
+import DataSources from "@/pages/DataSources";
+import AIAssistant from "@/pages/AIAssistant";
 import { useAuth } from "@/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -35,6 +37,8 @@ function Router() {
       <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/analytics" component={() => <ProtectedRoute component={AdvancedAnalytics} />} />
       <Route path="/due-diligence" component={() => <ProtectedRoute component={PEDueDiligence} />} />
+      <Route path="/data-sources" component={() => <ProtectedRoute component={DataSources} />} />
+      <Route path="/ai" component={() => <ProtectedRoute component={AIAssistant} />} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
