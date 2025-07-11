@@ -7,8 +7,9 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-// Re-export apiRequest for convenience
-export { apiRequest } from "./api";
+// Import and re-export apiRequest for convenience
+import { apiRequest } from "./api";
+export { apiRequest };
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {

@@ -47,10 +47,7 @@ export function QueryInterface() {
 
   const queryMutation = useMutation({
     mutationFn: async (question: string) => {
-      return apiRequest<QueryResult>("/api/ai/query", {
-        method: "POST",
-        body: JSON.stringify({ query: question })
-      });
+      return apiRequest("POST", "/api/ai/query", { query: question });
     },
     onSuccess: (result) => {
       const assistantMessage: ChatMessage = {
