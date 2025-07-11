@@ -11,6 +11,8 @@ import NotFound from "@/pages/not-found";
 import { PEDueDiligence } from "@/pages/PEDueDiligence";
 import DataSources from "@/pages/DataSources";
 import AIAssistant from "@/pages/AIAssistant";
+import Portfolio from "@/pages/Portfolio";
+import Warehouses from "@/pages/Warehouses";
 import { useAuth } from "@/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -39,6 +41,8 @@ function Router() {
       <Route path="/due-diligence" component={() => <ProtectedRoute component={PEDueDiligence} />} />
       <Route path="/data-sources" component={() => <ProtectedRoute component={DataSources} />} />
       <Route path="/ai" component={() => <ProtectedRoute component={AIAssistant} />} />
+      <Route path="/portfolio" component={() => <ProtectedRoute component={Portfolio} />} />
+      <Route path="/warehouses" component={() => <ProtectedRoute component={Warehouses} />} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />
     </Switch>
