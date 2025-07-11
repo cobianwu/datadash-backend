@@ -338,10 +338,10 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         description: `${pdfFileName} has been downloaded`,
       });
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error generating PDF:", error instanceof Error ? error.message : String(error));
       toast({
         title: "Export Error",
-        description: "Failed to generate PDF. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate PDF. Please try again.",
         variant: "destructive",
       });
     }

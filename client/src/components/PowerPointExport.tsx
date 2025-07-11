@@ -401,10 +401,10 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
         description: `${fileName} has been downloaded`,
       });
     } catch (error) {
-      console.error("Error generating PowerPoint:", error);
+      console.error("Error generating PowerPoint:", error instanceof Error ? error.message : String(error));
       toast({
         title: "Error",
-        description: "Failed to generate PowerPoint. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate PowerPoint. Please try again.",
         variant: "destructive",
       });
     }
