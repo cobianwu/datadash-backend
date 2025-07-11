@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Dashboard from "@/pages/Dashboard";
 import AdvancedAnalytics from "@/pages/AdvancedAnalytics";
 import Login from "@/pages/Login";
+import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 import { PEDueDiligence } from "@/pages/PEDueDiligence";
 import DataSources from "@/pages/DataSources";
@@ -27,16 +28,18 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   }
 
   if (!user) {
-    return <Login />;
+    return <Landing />;
   }
 
   return <Component />;
 }
 
 function Router() {
+  const { user } = useAuth();
+  
   return (
     <Switch>
-      <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
+      <Route path="/" component={() => user ? <Dashboard /> : <Landing />} />
       <Route path="/analytics" component={() => <ProtectedRoute component={AdvancedAnalytics} />} />
       <Route path="/due-diligence" component={() => <ProtectedRoute component={PEDueDiligence} />} />
       <Route path="/data-sources" component={() => <ProtectedRoute component={DataSources} />} />
