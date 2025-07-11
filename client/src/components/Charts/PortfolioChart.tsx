@@ -12,7 +12,7 @@ export function PortfolioChart() {
     return (
       <Card className="animate-slide-up">
         <CardHeader>
-          <CardTitle>Portfolio Performance</CardTitle>
+          <CardTitle>Revenue & EBITDA Trend</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
@@ -23,8 +23,8 @@ export function PortfolioChart() {
 
   const chartData = performanceData?.labels?.map((label: string, index: number) => ({
     month: label,
-    portfolio: performanceData.datasets[0]?.data[index],
-    forecast: performanceData.datasets[1]?.data[index],
+    revenue: performanceData.datasets[0]?.data[index],
+    ebitda: performanceData.datasets[1]?.data[index],
   })) || [];
 
   return (
@@ -32,17 +32,17 @@ export function PortfolioChart() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg font-semibold">Portfolio Performance</CardTitle>
+            <CardTitle className="text-lg font-semibold">Revenue & EBITDA Trend</CardTitle>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Revenue trend over time with forecasting
+              Monthly business performance metrics
             </p>
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm" className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
               1Y
             </Button>
+            <Button variant="ghost" size="sm">2Y</Button>
             <Button variant="ghost" size="sm">3Y</Button>
-            <Button variant="ghost" size="sm">5Y</Button>
           </div>
         </div>
       </CardHeader>
@@ -64,20 +64,20 @@ export function PortfolioChart() {
               <Legend />
               <Line 
                 type="monotone" 
-                dataKey="portfolio" 
+                dataKey="revenue" 
                 stroke="hsl(var(--primary))"
                 strokeWidth={3}
                 dot={{ fill: "hsl(var(--primary))", strokeWidth: 2, r: 4 }}
-                name="Portfolio Value"
+                name="Revenue"
               />
               <Line 
                 type="monotone" 
-                dataKey="forecast" 
+                dataKey="ebitda" 
                 stroke="hsl(var(--success))"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
-                name="Forecast"
+                name="EBITDA"
               />
             </LineChart>
           </ResponsiveContainer>

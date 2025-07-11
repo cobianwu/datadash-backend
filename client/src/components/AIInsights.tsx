@@ -7,15 +7,15 @@ export function AIInsights() {
     {
       type: "opportunity",
       icon: TrendingUp,
-      title: "Growth Opportunity",
-      description: "Healthcare sector showing 15% upward trend. Consider increasing allocation.",
+      title: "Revenue Acceleration",
+      description: "TechCorp's new product line showing 45% MoM growth. Consider scaling marketing spend.",
       iconColor: "text-green-300",
     },
     {
       type: "alert",
       icon: AlertTriangle,
-      title: "Risk Alert",
-      description: "Energy portfolio concentration at 35%. Diversification recommended.",
+      title: "Operational Alert",
+      description: "RetailBrand's CAC increased 23% this quarter. Review customer acquisition strategy.",
       iconColor: "text-yellow-300",
     },
   ];
@@ -25,8 +25,8 @@ export function AIInsights() {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg font-semibold">AI Insights</CardTitle>
-            <p className="text-blue-100 text-sm mt-1">Smart recommendations</p>
+            <CardTitle className="text-lg font-semibold">AI Business Insights</CardTitle>
+            <p className="text-blue-100 text-sm mt-1">Operational recommendations</p>
           </div>
           <Brain className="w-6 h-6 text-blue-200" />
         </div>

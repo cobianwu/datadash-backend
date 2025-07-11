@@ -9,6 +9,8 @@ DataFlow Analytics is a comprehensive business intelligence platform built as a 
 Preferred communication style: Simple, everyday language.
 User values: Transparency about what's functional vs mocked/demo data
 Approach: Be honest about current capabilities while showing what's been built
+Platform focus: Business intelligence for PE portfolio companies, not portfolio/investment tracking
+Key insight: Dashboard should focus on operational metrics that help with business decisions, not portfolio returns
 
 ## System Architecture
 
@@ -146,11 +148,25 @@ The architecture prioritizes developer experience with TypeScript throughout, ho
 - **Portfolio Page**: Complete portfolio management interface with company cards, performance charts, and analytics
 - **Warehouses Page**: Data warehouse management with support for Snowflake, BigQuery, Redshift, and Databricks
 - **Login Improvements**: Pre-filled demo credentials and helpful hints for easier access
+- **Customizable Dashboard**: Added ability to add/remove widgets and customize business metrics display
+- **Business Intelligence Focus**: Transformed dashboard from portfolio tracking to operational business metrics
 
 ### Fixes Applied
 - Fixed authentication by removing duplicate `apiRequest` functions
 - Added missing routes for Portfolio and Warehouses pages
 - Ensured all navigation links in sidebar are functional
+- Fixed nested anchor tag warnings in Sidebar component
+- Resolved import issues with apiRequest function
+
+### Architecture Updates
+- **Dashboard Transformation**: Shifted focus from portfolio returns to business KPIs
+  - Revenue growth, EBITDA margins, customer retention, burn rate
+  - Company-specific metric filtering
+  - Customizable widget system
+- **Updated Components**:
+  - PortfolioChart → Now shows Revenue & EBITDA trends
+  - TopPerformers → Now shows Company KPI Summary with operational metrics
+  - AIInsights → Now provides business operational recommendations
 
 ### Deployment Readiness
 The application is ready for deployment with the following considerations:

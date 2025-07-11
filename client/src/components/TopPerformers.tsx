@@ -11,7 +11,7 @@ export function TopPerformers() {
     return (
       <Card className="animate-slide-up">
         <CardHeader>
-          <CardTitle>Top Performers</CardTitle>
+          <CardTitle>Company KPI Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -25,9 +25,9 @@ export function TopPerformers() {
   }
 
   const defaultPerformers = [
-    { id: 1, name: "TechCorp", sector: "Technology", performance: 28.4, value: 45200000 },
-    { id: 2, name: "GreenSolutions", sector: "Energy", performance: 21.7, value: 38900000 },
-    { id: 3, name: "FinanceInc", sector: "Financial", performance: 18.3, value: 52100000 },
+    { id: 1, name: "TechCorp", sector: "Technology", revenue_growth: 28.4, ebitda_margin: 22.1, nps: 72 },
+    { id: 2, name: "GreenSolutions", sector: "Energy", revenue_growth: 21.7, ebitda_margin: 18.5, nps: 68 },
+    { id: 3, name: "FinanceInc", sector: "Financial", revenue_growth: 18.3, ebitda_margin: 25.2, nps: 74 },
   ];
 
   const displayData = performers || defaultPerformers;
@@ -50,8 +50,8 @@ export function TopPerformers() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-lg font-semibold">Top Performers</CardTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Last 30 days</p>
+            <CardTitle className="text-lg font-semibold">Company KPI Summary</CardTitle>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Key business metrics</p>
           </div>
           <Button variant="link" className="text-blue-600 dark:text-blue-400 p-0">
             View All
@@ -61,21 +61,31 @@ export function TopPerformers() {
       <CardContent>
         <div className="space-y-4">
           {displayData.map((company: any, index: number) => (
-            <div key={company.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 ${getGradientClass(index)} rounded-lg flex items-center justify-center`}>
-                  <span className="text-xs font-bold text-white">{getInitials(company.name)}</span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">{company.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{company.sector}</p>
+            <div key={company.id} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-8 h-8 ${getGradientClass(index)} rounded-lg flex items-center justify-center`}>
+                    <span className="text-xs font-bold text-white">{getInitials(company.name)}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{company.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{company.sector}</p>
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-green-600">+{company.performance.toFixed(1)}%</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  ${(company.value / 1000000).toFixed(1)}M
-                </p>
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>
+                  <p className="font-semibold text-green-600">+{company.revenue_growth?.toFixed(1) || company.performance?.toFixed(1)}%</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">EBITDA</p>
+                  <p className="font-semibold">{company.ebitda_margin?.toFixed(1) || 20.5}%</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">NPS</p>
+                  <p className="font-semibold">{company.nps || 70}</p>
+                </div>
               </div>
             </div>
           ))}
