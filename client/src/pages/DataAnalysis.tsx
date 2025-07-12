@@ -85,8 +85,8 @@ export default function DataAnalysis() {
         setChartData(data.sampleData);
       }
       
-      // Move to analysis tab
-      setActiveTab("analyze");
+      // Move to clean tab to allow data cleaning first
+      setActiveTab("clean");
     },
     onError: () => {
       toast({
@@ -477,23 +477,42 @@ export default function DataAnalysis() {
                 )}
 
                 {dataSources && dataSources.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium mb-2">Or select existing data:</p>
-                    <Select value={selectedDataSource} onValueChange={setSelectedDataSource}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a data source" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {dataSources.map((source: any) => (
-                          <SelectItem key={source.id} value={source.id.toString()}>
-                            <div className="flex items-center gap-2">
-                              <Database className="h-4 w-4" />
-                              {source.name} ({source.rowCount} rows)
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium mb-2">Select a data source to work with:</p>
+                      <Select value={selectedDataSource} onValueChange={(value) => {
+                        setSelectedDataSource(value);
+                        // Clear previous states when switching data sources
+                        setDataQuality(null);
+                        setChartData([]);
+                        setAnalysisResults(null);
+                      }}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Choose a data source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {dataSources.map((source: any) => (
+                            <SelectItem key={source.id} value={source.id.toString()}>
+                              <div className="flex items-center gap-2">
+                                <Database className="h-4 w-4" />
+                                {source.name} ({source.rowCount} rows)
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {selectedDataSource && (
+                      <Alert className="bg-blue-50 border-blue-200">
+                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <AlertDescription className="text-blue-800">
+                          Selected: {dataSources.find((s: any) => s.id.toString() === selectedDataSource)?.name}
+                          <br />
+                          <span className="text-sm">You can now clean, analyze, or export this data</span>
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </div>
                 )}
               </CardContent>

@@ -13,8 +13,9 @@ import {
   Wand2, Download, FileSpreadsheet, TrendingUp, AlertCircle,
   Loader2, Settings, ArrowRight
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 interface DataCleanerProps {
   dataSourceId: number;
@@ -22,7 +23,8 @@ interface DataCleanerProps {
   onCleanComplete?: () => void;
 }
 
-export function DataCleaner({ dataSourceId, dataQuality, onCleanComplete }: DataCleanerProps) {
+export function DataCleaner({ dataSourceId, dataQuality: initialQuality, onCleanComplete }: DataCleanerProps) {
+  const [dataQuality, setDataQuality] = useState(initialQuality);
   const [cleaningOptions, setCleaningOptions] = useState({
     fillMissing: true,
     removeOutliers: false,
@@ -32,6 +34,18 @@ export function DataCleaner({ dataSourceId, dataQuality, onCleanComplete }: Data
   });
   const [cleaningProgress, setCleaningProgress] = useState(0);
   const { toast } = useToast();
+
+  // Fetch data quality if not provided
+  const { data: fetchedQuality } = useQuery({
+    queryKey: [`/api/data-sources/${dataSourceId}/quality`],
+    enabled: !!dataSourceId && !initialQuality
+  });
+
+  useEffect(() => {
+    if (fetchedQuality) {
+      setDataQuality(fetchedQuality);
+    }
+  }, [fetchedQuality]);
 
   const cleanDataMutation = useMutation({
     mutationFn: async () => {
