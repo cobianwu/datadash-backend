@@ -237,7 +237,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dataQuality = DataTransformer.analyzeDataQuality(cleanedData);
       const analysis = AnalyticsEngine.performComprehensiveAnalysis(cleanedData);
       
-      // Store the actual data in memory for quick access
+      // Store the data in database for persistence
+      await storage.storeDataSourceData(
+        dataSource.id,
+        cleanedData,
+        processedFile.columns,
+        analysis,
+        dataQuality
+      );
+      
+      // Also keep in memory for quick access
       (global as any).uploadedData = (global as any).uploadedData || {};
       (global as any).uploadedData[dataSource.id] = {
         data: cleanedData,
@@ -337,28 +346,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Found data for source ${dataSourceId}: ${analysisData.length} rows, ${columns.length} columns`);
       } else {
         console.log(`No data found for source ${dataSourceId}`);
-        // Try to fetch from storage if not in memory
+        // Try to fetch from database storage if not in memory
         if (dataSourceId) {
           try {
-            const dataSource = await storage.getDataSource(dataSourceId);
-            if (dataSource && dataSource.filePath) {
-              console.log("Attempting to reload data from file:", dataSource.filePath);
-              const processedFile = await FileProcessor.processFile(dataSource.filePath, dataSource.fileName);
-              analysisData = processedFile.data || [];
-              columns = processedFile.columns || [];
+            console.log("Checking database for stored data...");
+            const storedData = await storage.getDataSourceData(dataSourceId);
+            if (storedData) {
+              analysisData = storedData.data;
+              columns = storedData.columns;
+              sourceAnalysis = storedData.analysis;
               
-              // Store back in memory
+              // Store back in memory for quick access
               uploadedData[dataSourceId] = {
                 data: analysisData,
                 columns: columns,
-                analysis: AnalyticsEngine.performComprehensiveAnalysis(analysisData),
-                dataQuality: DataTransformer.analyzeDataQuality(analysisData)
+                analysis: storedData.analysis,
+                dataQuality: storedData.dataQuality
               };
               (global as any).uploadedData = uploadedData;
-              console.log(`Reloaded data: ${analysisData.length} rows`);
+              console.log(`Loaded data from database: ${analysisData.length} rows`);
+            } else {
+              // Fallback: try to reload from file
+              const dataSource = await storage.getDataSource(dataSourceId);
+              if (dataSource && dataSource.filePath) {
+                console.log("Attempting to reload data from file:", dataSource.filePath);
+                const processedFile = await FileProcessor.processFile(dataSource.filePath, dataSource.fileName);
+                analysisData = processedFile.data || [];
+                columns = processedFile.columns || [];
+                
+                // Store back in memory and database
+                const analysis = AnalyticsEngine.performComprehensiveAnalysis(analysisData);
+                const dataQuality = DataTransformer.analyzeDataQuality(analysisData);
+                
+                await storage.storeDataSourceData(dataSourceId, analysisData, columns, analysis, dataQuality);
+                
+                uploadedData[dataSourceId] = {
+                  data: analysisData,
+                  columns: columns,
+                  analysis,
+                  dataQuality
+                };
+                (global as any).uploadedData = uploadedData;
+                console.log(`Reloaded and stored data: ${analysisData.length} rows`);
+              }
             }
           } catch (error) {
-            console.error("Error reloading data:", error);
+            console.error("Error loading data:", error);
           }
         }
       }

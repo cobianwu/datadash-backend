@@ -50,6 +50,17 @@ export const dataSources = pgTable("data_sources", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// New table for storing actual data
+export const dataSourceData = pgTable("data_source_data", {
+  id: serial("id").primaryKey(),
+  dataSourceId: integer("data_source_id").references(() => dataSources.id).notNull(),
+  data: jsonb("data").notNull(), // Actual data rows
+  columns: jsonb("columns").notNull(), // Column metadata
+  analysis: jsonb("analysis"), // Pre-computed analysis
+  dataQuality: jsonb("data_quality"), // Quality metrics
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const queryHistory = pgTable("query_history", {
   id: serial("id").primaryKey(),
   sqlQuery: text("sql_query").notNull(),

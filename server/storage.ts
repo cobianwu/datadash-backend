@@ -1,5 +1,5 @@
 import { 
-  users, warehouses, dataSources, queryHistory, charts, dashboards, aiConversations, companies,
+  users, warehouses, dataSources, dataSourceData, queryHistory, charts, dashboards, aiConversations, companies,
   type User, type InsertUser, type Warehouse, type InsertWarehouse,
   type DataSource, type InsertDataSource, type QueryHistory, type InsertQueryHistory,
   type Chart, type InsertChart, type Dashboard, type InsertDashboard,
@@ -28,6 +28,10 @@ export interface IStorage {
   createDataSource(dataSource: InsertDataSource): Promise<DataSource>;
   updateDataSource(id: number, updates: Partial<DataSource>): Promise<DataSource | undefined>;
   deleteDataSource(id: number): Promise<boolean>;
+
+  // Data source data operations
+  storeDataSourceData(dataSourceId: number, data: any[], columns: string[], analysis?: any, dataQuality?: any): Promise<void>;
+  getDataSourceData(dataSourceId: number): Promise<{ data: any[], columns: string[], analysis?: any, dataQuality?: any } | undefined>;
 
   // Query history operations
   getUserQueryHistory(userId: number): Promise<QueryHistory[]>;
@@ -312,6 +316,17 @@ export class MemStorage implements IStorage {
 
   async deleteDataSource(id: number): Promise<boolean> {
     return this.dataSources.delete(id);
+  }
+
+  // Data source data operations  
+  async storeDataSourceData(dataSourceId: number, data: any[], columns: string[], analysis?: any, dataQuality?: any): Promise<void> {
+    // Memory storage doesn't need to do anything - data is stored separately
+    console.log(`Memory storage: Would store ${data.length} rows for data source ${dataSourceId}`);
+  }
+
+  async getDataSourceData(dataSourceId: number): Promise<{ data: any[], columns: string[], analysis?: any, dataQuality?: any } | undefined> {
+    // Memory storage returns undefined - data is managed separately
+    return undefined;
   }
 
   // Query history operations
@@ -703,6 +718,33 @@ export class DatabaseStorage implements IStorage {
   async deleteCompany(id: number): Promise<boolean> {
     await db.delete(companies).where(eq(companies.id, id));
     return true;
+  }
+
+  // Data source data operations
+  async storeDataSourceData(dataSourceId: number, data: any[], columns: string[], analysis?: any, dataQuality?: any): Promise<void> {
+    // First, delete any existing data for this source
+    await db.delete(dataSourceData).where(eq(dataSourceData.dataSourceId, dataSourceId));
+    
+    // Then insert the new data
+    await db.insert(dataSourceData).values({
+      dataSourceId,
+      data,
+      columns,
+      analysis,
+      dataQuality
+    });
+  }
+
+  async getDataSourceData(dataSourceId: number): Promise<{ data: any[], columns: string[], analysis?: any, dataQuality?: any } | undefined> {
+    const [result] = await db.select().from(dataSourceData).where(eq(dataSourceData.dataSourceId, dataSourceId));
+    if (!result) return undefined;
+    
+    return {
+      data: result.data as any[],
+      columns: result.columns as string[],
+      analysis: result.analysis,
+      dataQuality: result.dataQuality
+    };
   }
 }
 
