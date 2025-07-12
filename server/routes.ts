@@ -359,40 +359,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Simple data processing based on common queries
         const queryLower = query.toLowerCase();
         
+        // Find relevant columns intelligently
+        const findColumn = (keywords: string[]) => {
+          for (const keyword of keywords) {
+            const col = columns.find(c => c.toLowerCase().includes(keyword));
+            if (col) return col;
+          }
+          return null;
+        };
+        
+        // Identify date, value and category columns
+        const dateColumn = findColumn(['date', 'month', 'time', 'period', 'year']);
+        const revenueColumn = findColumn(['revenue', 'sales', 'amount', 'total', 'value']);
+        const profitColumn = findColumn(['profit', 'earnings', 'income']);
+        const companyColumn = findColumn(['company', 'customer', 'client', 'name']);
+        const regionColumn = findColumn(['region', 'area', 'location', 'country']);
+        const productColumn = findColumn(['product', 'item', 'service']);
+        
         if (queryLower.includes("month") || queryLower.includes("time") || queryLower.includes("trend")) {
           // Time series data
-          resultData = analysisData.slice(0, 12).map((row, index) => ({
-            name: row[columns[0]] || `Month ${index + 1}`,
-            value: row[columns[1]] || Math.floor(Math.random() * 10000),
-            category: row[columns[2]] || "Default"
-          }));
+          const timeCol = dateColumn || columns[0];
+          const valueCol = revenueColumn || profitColumn || columns.find(c => typeof analysisData[0][c] === 'number') || columns[1];
+          
+          // Group by time period
+          const timeGroups: any = {};
+          analysisData.forEach(row => {
+            const timeKey = row[timeCol] || 'Unknown';
+            if (!timeGroups[timeKey]) timeGroups[timeKey] = 0;
+            timeGroups[timeKey] += parseFloat(row[valueCol]) || 0;
+          });
+          
+          resultData = Object.entries(timeGroups)
+            .map(([name, value]) => ({
+              name,
+              value: Math.round(value as number)
+            }))
+            .sort((a, b) => {
+              // Sort by date if possible
+              const dateA = new Date(a.name).getTime();
+              const dateB = new Date(b.name).getTime();
+              if (!isNaN(dateA) && !isNaN(dateB)) {
+                return dateA - dateB;
+              }
+              return 0;
+            })
+            .slice(0, 24); // Show up to 24 time periods
+            
         } else if (queryLower.includes("top") || queryLower.includes("best")) {
           // Top performers
-          resultData = analysisData
-            .sort((a, b) => (b[columns[1]] || 0) - (a[columns[1]] || 0))
-            .slice(0, 10)
-            .map(row => ({
-              name: row[columns[0]] || "Unknown",
-              value: row[columns[1]] || 0,
-              category: row[columns[2]] || "Default"
-            }));
-        } else if (queryLower.includes("by") || queryLower.includes("group")) {
-          // Group by analysis
+          const nameCol = companyColumn || productColumn || columns[0];
+          const valueCol = revenueColumn || profitColumn || columns.find(c => typeof analysisData[0][c] === 'number') || columns[1];
+          
+          // Aggregate by name
           const groups: any = {};
+          analysisData.forEach(row => {
+            const key = row[nameCol] || 'Unknown';
+            if (!groups[key]) groups[key] = 0;
+            groups[key] += parseFloat(row[valueCol]) || 0;
+          });
           
-          // Determine which column to group by
-          let groupColumn = columns[0]; // Default to first column
-          let valueColumn = columns.find(col => col.toLowerCase().includes('revenue')) || columns[3]; // Look for revenue column
+          resultData = Object.entries(groups)
+            .map(([name, value]) => ({
+              name,
+              value: Math.round(value as number)
+            }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 10);
+            
+        } else if (queryLower.includes("by") || queryLower.includes("group") || queryLower.includes("compare")) {
+          // Group by analysis
+          let groupColumn = columns[0];
+          let valueColumn = revenueColumn || profitColumn || columns.find(c => typeof analysisData[0][c] === 'number') || columns[1];
           
-          // If query mentions company, group by company
-          if (queryLower.includes("company")) {
-            groupColumn = columns.find(col => col.toLowerCase().includes('company')) || columns[0];
-          } else if (queryLower.includes("region")) {
-            groupColumn = columns.find(col => col.toLowerCase().includes('region')) || columns[0];
-          } else if (queryLower.includes("product")) {
-            groupColumn = columns.find(col => col.toLowerCase().includes('product')) || columns[0];
+          // Determine grouping based on query
+          if (queryLower.includes("company") || queryLower.includes("customer")) {
+            groupColumn = companyColumn || columns[0];
+          } else if (queryLower.includes("region") || queryLower.includes("location")) {
+            groupColumn = regionColumn || columns[0];
+          } else if (queryLower.includes("product") || queryLower.includes("item")) {
+            groupColumn = productColumn || columns[0];
           }
           
+          const groups: any = {};
           analysisData.forEach(row => {
             const key = row[groupColumn] || "Other";
             if (!groups[key]) groups[key] = 0;
@@ -403,40 +451,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
           resultData = Object.entries(groups)
             .map(([name, value]) => ({
               name,
-              value: Math.round(value as number),
-              category: groupColumn
+              value: Math.round(value as number)
             }))
-            .sort((a, b) => b.value - a.value);
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 20); // Show top 20 groups
+            
         } else {
-          // Default: show first 10 rows
-          resultData = analysisData.slice(0, 10).map(row => ({
-            name: row[columns[0]] || "Item",
-            value: row[columns[1]] || 0,
-            category: row[columns[2]] || "Default"
-          }));
+          // Default: show summary of numeric columns
+          const numericCol = revenueColumn || profitColumn || columns.find(c => typeof analysisData[0][c] === 'number');
+          const nameCol = companyColumn || productColumn || columns[0];
+          
+          if (numericCol) {
+            // Aggregate by name column
+            const groups: any = {};
+            analysisData.forEach(row => {
+              const key = row[nameCol] || 'Item';
+              if (!groups[key]) groups[key] = 0;
+              groups[key] += parseFloat(row[numericCol]) || 0;
+            });
+            
+            resultData = Object.entries(groups)
+              .map(([name, value]) => ({
+                name,
+                value: Math.round(value as number)
+              }))
+              .sort((a, b) => b.value - a.value)
+              .slice(0, 15);
+          } else {
+            // Fallback to counting occurrences
+            const counts: any = {};
+            analysisData.forEach(row => {
+              const key = row[nameCol] || 'Item';
+              counts[key] = (counts[key] || 0) + 1;
+            });
+            
+            resultData = Object.entries(counts)
+              .map(([name, value]) => ({
+                name,
+                value: value as number
+              }))
+              .sort((a, b) => b.value - a.value)
+              .slice(0, 10);
+          }
         }
       } else {
         // Fallback data if no data source
         resultData = [
-          { name: "Jan", value: 4000, category: "Sales" },
-          { name: "Feb", value: 3000, category: "Sales" },
-          { name: "Mar", value: 5000, category: "Sales" },
-          { name: "Apr", value: 4500, category: "Sales" },
-          { name: "May", value: 6000, category: "Sales" },
-          { name: "Jun", value: 5500, category: "Sales" }
+          { name: "Jan", value: 4000 },
+          { name: "Feb", value: 3000 },
+          { name: "Mar", value: 5000 },
+          { name: "Apr", value: 4500 },
+          { name: "May", value: 6000 },
+          { name: "Jun", value: 5500 }
         ];
       }
 
-      // Generate chart data for the top recommendation
-      let chartData = null;
-      if (chartRecommendations.length > 0 && resultData.length > 0) {
-        const topChart = chartRecommendations[0];
-        chartData = ChartGenerator.generateChartData(resultData, {
-          type: topChart.type,
-          data: resultData,
-          ...topChart.config
-        });
-      }
+      // For now, we'll use the simple resultData directly
+      // This ensures data is always in the correct format for charts
+      let chartData = resultData;
 
       const result = {
         sql,

@@ -320,36 +320,40 @@ export default function DataAnalysis() {
   const renderChart = () => {
     if (!chartData || chartData.length === 0) return null;
 
+    // For most charts, we expect data with 'name' and 'value' properties
+    // For scatter, we'll use the actual column names
+    const isScatterData = chartType === "scatter" && chartData[0] && !chartData[0].hasOwnProperty('value');
+    
     return (
       <ResponsiveContainer width="100%" height="100%">
         {chartType === "bar" && (
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={Object.keys(chartData[0])[0]} />
+            <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey={Object.keys(chartData[0])[1] || "value"} fill="#3b82f6" />
+            <Bar dataKey="value" fill="#3b82f6" />
           </BarChart>
         )}
         {chartType === "line" && (
           <RechartsLineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={Object.keys(chartData[0])[0]} />
+            <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey={Object.keys(chartData[0])[1] || "value"} stroke="#3b82f6" strokeWidth={2} />
+            <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} />
           </RechartsLineChart>
         )}
         {chartType === "area" && (
           <AreaChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={Object.keys(chartData[0])[0]} />
+            <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Area type="monotone" dataKey={Object.keys(chartData[0])[1] || "value"} stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
+            <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
           </AreaChart>
         )}
         {chartType === "pie" && (
@@ -359,10 +363,10 @@ export default function DataAnalysis() {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={(entry) => entry[Object.keys(entry)[0]]}
+              label={(entry) => entry.name || entry[Object.keys(entry)[0]]}
               outerRadius={120}
               fill="#8884d8"
-              dataKey={Object.keys(chartData[0])[1] || "value"}
+              dataKey="value"
             >
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -374,8 +378,16 @@ export default function DataAnalysis() {
         {chartType === "scatter" && (
           <ScatterChart>
             <CartesianGrid />
-            <XAxis dataKey={Object.keys(chartData[0])[0]} />
-            <YAxis dataKey={Object.keys(chartData[0])[1]} />
+            <XAxis 
+              type="number" 
+              dataKey={isScatterData ? Object.keys(chartData[0])[0] : "name"}
+              name={isScatterData ? Object.keys(chartData[0])[0] : "name"}
+            />
+            <YAxis 
+              type="number" 
+              dataKey={isScatterData ? Object.keys(chartData[0])[1] : "value"}
+              name={isScatterData ? Object.keys(chartData[0])[1] : "value"}
+            />
             <Tooltip cursor={{ strokeDasharray: '3 3' }} />
             <Scatter name="Data" data={chartData} fill="#3b82f6" />
           </ScatterChart>
@@ -383,7 +395,7 @@ export default function DataAnalysis() {
         {chartType === "treemap" && (
           <Treemap
             data={chartData}
-            dataKey={Object.keys(chartData[0])[1] || "value"}
+            dataKey="value"
             ratio={4 / 3}
             stroke="#fff"
             fill="#3b82f6"

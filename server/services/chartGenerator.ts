@@ -301,11 +301,20 @@ export class ChartGenerator {
     
     if (!xAxis || !yAxis) return data;
     
-    return data.map(row => ({
-      x: row[xAxis] || 0,
-      y: row[yAxis] || 0,
-      name: row[Object.keys(row)[0]] // Use first column as label
-    }));
+    // For scatter plots, we need to keep the data in a format that Recharts expects
+    // but ensure values are primitives, not objects
+    return data.map(row => {
+      const result: any = {};
+      
+      // Use the column names as keys
+      if (xAxis) result[xAxis] = row[xAxis] || 0;
+      if (yAxis) result[yAxis] = row[yAxis] || 0;
+      
+      // Add a name for tooltip display
+      result.name = row[Object.keys(row)[0]] || 'Point';
+      
+      return result;
+    });
   }
   
   private static generateHeatmapData(data: any[], config: ChartConfig): any {
