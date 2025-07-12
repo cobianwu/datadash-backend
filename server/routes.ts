@@ -231,6 +231,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req.user as any).id;
       const processedFile = await FileProcessor.processFile(req.file.path, req.file.originalname);
       
+      // Check if it's a multi-sheet workbook
+      const isMultiSheet = processedFile.type === 'excel-multisheet';
+      let multiSheetData = null;
+      let workbookSummary = null;
+      let sheets = null;
+      
+      if (isMultiSheet) {
+        multiSheetData = (processedFile as any).multiSheetData;
+        workbookSummary = (processedFile as any).workbookSummary;
+        sheets = (processedFile as any).sheets;
+      }
+      
       const dataSource = await storage.createDataSource({
         name: processedFile.name,
         type: processedFile.type,
@@ -262,7 +274,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         data: cleanedData,
         columns: processedFile.columns,
         analysis,
-        dataQuality
+        dataQuality,
+        multiSheetData,
+        workbookSummary,
+        sheets
       };
 
       res.json({
