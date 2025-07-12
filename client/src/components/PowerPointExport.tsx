@@ -76,13 +76,13 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
       });
       
       const summaryPoints = [
-        `Company: ${company?.name || 'Target Company'}`,
-        `Sector: ${company?.industry || 'Technology'}`,
-        `Revenue: $${((company?.revenue || 280000000) / 1000000).toFixed(0)}M`,
-        `Growth Rate: ${company?.growthRate || 33}% YoY`,
-        `Valuation: $${((company?.valuation || 4200000000) / 1000000000).toFixed(1)}B`,
-        `Investment Stage: ${company?.stage || 'Series C'}`,
-        `Recommendation: Proceed with investment`,
+        { text: `Company: ${company?.name || 'Target Company'}`, options: { bullet: true } },
+        { text: `Sector: ${company?.industry || 'Technology'}`, options: { bullet: true } },
+        { text: `Revenue: $${((company?.revenue || 280000000) / 1000000).toFixed(0)}M`, options: { bullet: true } },
+        { text: `Growth Rate: ${company?.growthRate || 33}% YoY`, options: { bullet: true } },
+        { text: `Valuation: $${((company?.valuation || 4200000000) / 1000000000).toFixed(1)}B`, options: { bullet: true } },
+        { text: `Investment Stage: ${company?.stage || 'Series C'}`, options: { bullet: true } },
+        { text: `Recommendation: Proceed with investment`, options: { bullet: true } },
       ];
       
       execSlide.addText(summaryPoints, {
@@ -91,7 +91,6 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
         w: 9,
         h: 4,
         fontSize: 18,
-        bullet: true,
         color: colors.text,
         lineSpacing: 36,
       });
@@ -235,13 +234,13 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
       });
 
       const thesisPoints = [
-        "Exceptional unit economics with LTV/CAC > 400x",
-        "Strong product-market fit in enterprise segment",
-        "Clear path to $1B ARR within 3 years",
-        "Proven land-and-expand motion",
-        "Best-in-class NRR of 165%",
-        "TAM expansion through AI capabilities",
-        "15-20x ARR valuation justified by growth metrics",
+        { text: "Exceptional unit economics with LTV/CAC > 400x", options: { bullet: true } },
+        { text: "Strong product-market fit in enterprise segment", options: { bullet: true } },
+        { text: "Clear path to $1B ARR within 3 years", options: { bullet: true } },
+        { text: "Proven land-and-expand motion", options: { bullet: true } },
+        { text: "Best-in-class NRR of 165%", options: { bullet: true } },
+        { text: "TAM expansion through AI capabilities", options: { bullet: true } },
+        { text: "15-20x ARR valuation justified by growth metrics", options: { bullet: true } },
       ];
 
       thesisSlide.addText(thesisPoints, {
@@ -250,7 +249,6 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
         w: 9,
         h: 4,
         fontSize: 18,
-        bullet: true,
         color: colors.text,
         lineSpacing: 36,
       });
@@ -372,12 +370,12 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
       });
 
       const timeline = [
-        "Week 1-2: Complete management meetings & reference calls",
-        "Week 3: Finalize legal and compliance review",
-        "Week 4: Negotiate term sheet and valuation",
-        "Week 5: Investment committee presentation",
-        "Week 6: Execute definitive agreements",
-        "Week 7-8: Close transaction & begin integration",
+        { text: "Week 1-2: Complete management meetings & reference calls", options: { bullet: true } },
+        { text: "Week 3: Finalize legal and compliance review", options: { bullet: true } },
+        { text: "Week 4: Negotiate term sheet and valuation", options: { bullet: true } },
+        { text: "Week 5: Investment committee presentation", options: { bullet: true } },
+        { text: "Week 6: Execute definitive agreements", options: { bullet: true } },
+        { text: "Week 7-8: Close transaction & begin integration", options: { bullet: true } },
       ];
 
       nextSlide.addText(timeline, {
@@ -386,7 +384,6 @@ export function PowerPointExport({ company, data }: { company?: any, data?: any 
         w: 9,
         h: 4,
         fontSize: 18,
-        bullet: true,
         color: colors.text,
         lineSpacing: 36,
       });

@@ -2,18 +2,10 @@ import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 
-// Extend jsPDF type to include autoTable
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable: {
-      finalY: number;
-    };
-  }
-}
+// Type definition for jspdf-autotable
 
 interface PDFExportProps {
   data?: any;
@@ -77,7 +69,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["Recommendation", "Proceed with investment"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: 95,
         head: [["Metric", "Value"]],
         body: summaryData,
@@ -109,7 +101,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["Rule of 40", "155", "Exceptional"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: 40,
         head: [["Metric", "Value", "Performance"]],
         body: unitEconomicsData,
@@ -120,7 +112,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
       });
 
       // Revenue Projections
-      let yPos = pdf.lastAutoTable.finalY + 15;
+      let yPos = (pdf as any).lastAutoTable.finalY + 15;
       pdf.setFontSize(14);
       pdf.setFont("helvetica", "bold");
       pdf.text("Revenue Projections", 20, yPos);
@@ -132,7 +124,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["2027", "$945M", "50%", "Base Case"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: yPos + 5,
         head: [["Year", "Revenue", "Growth", "Scenario"]],
         body: projectionData,
@@ -158,7 +150,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["Consumer", "$56M", "20%", "25% growth"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: 40,
         head: [["Segment", "Revenue", "% of Total", "Growth Rate"]],
         body: segmentData,
@@ -169,7 +161,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
       });
 
       // Geographic Distribution
-      yPos = pdf.lastAutoTable.finalY + 15;
+      yPos = (pdf as any).lastAutoTable.finalY + 15;
       pdf.setFontSize(14);
       pdf.text("Geographic Distribution", 20, yPos);
 
@@ -180,7 +172,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["LATAM", "$28M", "10%", "São Paulo, Mexico City"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: yPos + 5,
         head: [["Region", "Revenue", "% of Total", "Offices"]],
         body: geoData,
@@ -229,7 +221,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["Technology Debt", "Low", "Continuous refactoring"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: textY + 15,
         head: [["Risk", "Impact", "Mitigation"]],
         body: riskData,
@@ -255,7 +247,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
         ["ESG Assessment", "○ Pending", "Data collection phase"],
       ];
 
-      pdf.autoTable({
+      autoTable(pdf, {
         startY: 30,
         head: [["Item", "Status", "Notes"]],
         body: ddData,
@@ -266,7 +258,7 @@ export function PDFExport({ data, fileName = "dataflow_report", company, charts 
       });
 
       // Next Steps
-      yPos = pdf.lastAutoTable.finalY + 20;
+      yPos = (pdf as any).lastAutoTable.finalY + 20;
       pdf.setFontSize(18);
       pdf.setFont("helvetica", "bold");
       pdf.text("Next Steps", 20, yPos);
