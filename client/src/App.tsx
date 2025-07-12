@@ -11,6 +11,7 @@ import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 import { PEDueDiligence } from "@/pages/PEDueDiligence";
 import DataSources from "@/pages/DataSources";
+import DataAnalysis from "@/pages/DataAnalysis";
 import AIAssistant from "@/pages/AIAssistant";
 import Portfolio from "@/pages/Portfolio";
 import Warehouses from "@/pages/Warehouses";
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/analytics" component={() => <ProtectedRoute component={AdvancedAnalytics} />} />
       <Route path="/due-diligence" component={() => <ProtectedRoute component={PEDueDiligence} />} />
       <Route path="/data-sources" component={() => <ProtectedRoute component={DataSources} />} />
+      <Route path="/data-analysis" component={() => <ProtectedRoute component={DataAnalysis} />} />
       <Route path="/ai" component={() => <ProtectedRoute component={AIAssistant} />} />
       <Route path="/portfolio" component={() => <ProtectedRoute component={Portfolio} />} />
       <Route path="/warehouses" component={() => <ProtectedRoute component={Warehouses} />} />

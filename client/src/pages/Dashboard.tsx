@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Link } from "wouter";
 import { 
   TrendingUp, 
   Users, 
@@ -20,7 +21,8 @@ import {
   Plus,
   Gauge,
   Target,
-  Activity
+  Activity,
+  Upload
 } from "lucide-react";
 
 interface DashboardWidget {
@@ -112,6 +114,12 @@ export default function Dashboard() {
             </Select>
           </div>
           <div className="flex gap-2">
+            <Link href="/data-analysis">
+              <Button variant="default" className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload & Analyze Data
+              </Button>
+            </Link>
             <Button
               variant={isCustomizing ? "default" : "outline"}
               onClick={() => setIsCustomizing(!isCustomizing)}
