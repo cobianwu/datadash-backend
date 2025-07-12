@@ -20,8 +20,8 @@ export default function Landing() {
   const features = [
     {
       icon: Brain,
-      title: "Automated Due Diligence",
-      description: "Streamline financial and operational diligence. Organize massive datasets, identify red flags, and generate insights that would take analysts weeks to produce."
+      title: "Automated Strategic Analysis",
+      description: "Streamline financial and operational reviews. Organize massive datasets, identify opportunities and risks, and generate insights that would take analysts weeks to produce."
     },
     {
       icon: BarChart3,
@@ -35,8 +35,8 @@ export default function Landing() {
     },
     {
       icon: LineChart,
-      title: "One-Click IC Memos",
-      description: "Export findings directly to PowerPoint, Excel, or PDF. Generate investment committee memos and board decks with perfectly formatted charts."
+      title: "One-Click Board Reports",
+      description: "Export findings directly to PowerPoint, Excel, or PDF. Generate executive presentations and board decks with perfectly formatted charts and insights."
     },
     {
       icon: Users,
@@ -52,8 +52,8 @@ export default function Landing() {
 
   const benefits = [
     "Replace 2-3 analysts with one platform",
-    "Complete due diligence 10x faster",
-    "Generate IC memos in 15 minutes",
+    "Complete strategic analysis 10x faster",
+    "Generate board reports in 15 minutes",
     "Export directly to PowerPoint and Excel",
     "Analyze millions of data points instantly",
     "Zero SQL or technical skills required"
@@ -109,8 +109,8 @@ export default function Landing() {
             Where Data Meets Decision
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-            Transform complex due diligence into clear investment decisions. Organize massive datasets, 
-            generate actionable insights, and export board-ready presentations—all in minutes, not weeks.
+            Transform complex business data into clear strategic decisions. Whether for M&A, investments, or operations, 
+            turn massive datasets into actionable insights and board-ready presentations—in minutes, not weeks.
           </p>
           <div className="flex gap-4 justify-center mb-12">
             <Link href="/login">
@@ -122,7 +122,7 @@ export default function Landing() {
               <Play className="h-4 w-4" /> Watch Demo
             </Button>
           </div>
-          <p className="text-sm text-gray-500">AI-powered analysis • Natural language queries • One-click IC memo export</p>
+          <p className="text-sm text-gray-500">AI-powered analysis • Natural language queries • One-click executive report export</p>
         </div>
       </section>
 
@@ -132,7 +132,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold mb-2">2 Days → 2 Hours</div>
-              <div className="text-blue-100">Due Diligence Time</div>
+              <div className="text-blue-100">Analysis Time</div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">$250K+</div>
@@ -144,7 +144,7 @@ export default function Landing() {
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">15 Min</div>
-              <div className="text-blue-100">To Generate IC Memo</div>
+              <div className="text-blue-100">To Board-Ready Report</div>
             </div>
           </div>
         </div>
@@ -229,7 +229,7 @@ export default function Landing() {
       {/* Due Diligence Workflow Section */}
       <section className="bg-gray-50 dark:bg-gray-900 py-20">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-12">From Data Chaos to IC Memo in 4 Steps</h2>
+          <h2 className="text-4xl font-bold text-center mb-12">From Data Chaos to Board Deck in 4 Steps</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
             <div className="text-center">
               <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
@@ -264,7 +264,7 @@ export default function Landing() {
               </div>
               <h3 className="font-semibold mb-2">Export Ready</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                One-click export to PowerPoint, Excel, or PDF. Perfectly formatted for IC memos and board decks.
+                One-click export to PowerPoint, Excel, or PDF. Perfectly formatted for executive presentations and board decks.
               </p>
             </div>
           </div>
@@ -274,9 +274,9 @@ export default function Landing() {
       {/* Comparison Section */}
       <section className="container mx-auto px-6 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Why PE Firms Choose DataFlow</h2>
+          <h2 className="text-4xl font-bold mb-4">Why Strategic Teams Choose DataFlow</h2>
           <p className="text-xl text-gray-600 dark:text-gray-300">
-            See how we compare to traditional approaches
+            See how we transform data analysis for M&A, investments, and strategic decisions
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -334,7 +334,7 @@ export default function Landing() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-yellow-500 mt-1">~</span>
-                  <span>No IC memo generation</span>
+                  <span>No executive report generation</span>
                 </li>
               </ul>
             </CardContent>
@@ -371,7 +371,7 @@ export default function Landing() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-600 mt-1">✓</span>
-                  <span>Direct IC memo export</span>
+                  <span>Direct board deck export</span>
                 </li>
               </ul>
             </CardContent>
@@ -384,10 +384,10 @@ export default function Landing() {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold mb-6">Purpose-Built for Private Equity</h2>
+              <h2 className="text-4xl font-bold mb-6">Purpose-Built for Deal-Making Excellence</h2>
               <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                We understand deal flow, due diligence, and portfolio monitoring because we built DataFlow 
-                specifically for PE professionals. Every feature is designed to accelerate your workflow.
+                Whether you're in private equity, corporate development, or strategic consulting, DataFlow 
+                accelerates complex analysis. Built by deal professionals, for deal professionals.
               </p>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -428,7 +428,7 @@ export default function Landing() {
       {/* Testimonials */}
       <section className="bg-gray-50 dark:bg-gray-900 py-20">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-12">Trusted by PE Firms and Portfolio Companies</h2>
+          <h2 className="text-4xl font-bold text-center mb-12">Trusted by Leading Deal-Making Teams</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <Card key={index} className="border-gray-200 dark:border-gray-700">

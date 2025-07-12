@@ -153,14 +153,15 @@ The architecture prioritizes developer experience with TypeScript throughout, ho
 - **Customizable Dashboard**: Added ability to add/remove widgets and customize business metrics display
 - **Business Intelligence Focus**: Transformed dashboard from portfolio tracking to operational business metrics
 - **Public Landing Page**: Professional marketing page showcasing platform capabilities
-  - Hero section positioning DataFlow as replacement for PE analysts & Snowflake Sigma
-  - Feature showcase emphasizing due diligence automation and data organization
+  - Hero section with tagline "Where Data Meets Decision"
+  - Broader business positioning while maintaining PE credibility
+  - Feature showcase emphasizing strategic analysis and data organization
   - 4-step workflow visualization (Upload → AI Organizes → Ask Anything → Export Ready)
   - Comprehensive comparison table vs traditional analysts and Snowflake Sigma
-  - Customer testimonials from PE professionals highlighting time/cost savings
+  - Customer testimonials from PE professionals (maintained for credibility)
   - Pricing tiers (Starter $999, Professional $2999, Enterprise Custom)
-  - Strong emphasis on IC memo generation and board deck exports
-  - Target audience: PE firms, operating partners, due diligence teams
+  - Language adjusted for broader audience: "Strategic Analysis" instead of "Due Diligence", "Board Reports" instead of "IC Memos"
+  - Target audience expanded: PE firms, corporate development, management consultants, investment banks, CFO offices
 
 ### Fixes Applied
 - Fixed authentication by removing duplicate `apiRequest` functions
