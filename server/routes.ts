@@ -14,7 +14,7 @@ import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
 import { advancedAnalyticsRouter } from "./routes/advancedAnalytics";
 import { RealtimeService } from "./services/realtimeService";
-import * as Papa from "papaparse";
+import Papa from "papaparse";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
@@ -329,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Try to load from file if available
       if (dataSource.filePath) {
         try {
-          const fs = require("fs");
+          const fs = await import("fs");
           if (fs.existsSync(dataSource.filePath)) {
             const processedFile = await FileProcessor.processFile(dataSource.filePath, dataSource.fileName || "file");
             if (processedFile.data && processedFile.data.length > 0) {
