@@ -11,7 +11,7 @@ import { queryClient } from "@/lib/queryClient";
 import { 
   Upload, Search, BarChart3, LineChart, PieChart, RefreshCw, Download, Brain, FileText, 
   TrendingUp, AlertCircle, CheckCircle, FileSpreadsheet, FileDown, Presentation,
-  Activity, Database, Sparkles, AlertTriangle, ArrowUpRight, ArrowDownRight
+  Activity, Database, Sparkles, AlertTriangle, ArrowUpRight, ArrowDownRight, Settings2
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,18 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { DataCleaner } from "@/components/DataCleaner";
+import { ChartFormatter, ChartConfig, formatNumber } from "@/components/Charts/ChartFormatter";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ExcelExport } from "@/components/ExcelExport";
+import { PDFExport } from "@/components/PDFExport";
+import { PowerPointExport } from "@/components/PowerPointExport";
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
@@ -39,6 +51,47 @@ export default function DataAnalysis() {
   const [analysisResults, setAnalysisResults] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("upload");
   const [trendResults, setTrendResults] = useState<any>(null);
+  const [chartConfig, setChartConfig] = useState<ChartConfig>({
+    title: "Data Analysis",
+    xAxis: {
+      label: "X Axis",
+      format: {
+        numberFormat: "0,0",
+        unit: "",
+        prefix: "",
+        suffix: "",
+        decimals: 0,
+        abbreviate: false,
+      },
+      showGrid: true,
+      showAxis: true,
+    },
+    yAxis: {
+      label: "Y Axis", 
+      format: {
+        numberFormat: "$0,0",
+        unit: "$",
+        prefix: "",
+        suffix: "",
+        decimals: 0,
+        abbreviate: true,
+      },
+      showGrid: true,
+      showAxis: true,
+    },
+    showLegend: true,
+    legendPosition: "bottom",
+    showDataLabels: false,
+    dataLabelFormat: {
+      numberFormat: "0,0",
+      unit: "",
+      prefix: "",
+      suffix: "",
+      decimals: 0,
+      abbreviate: true,
+    },
+    theme: "colorful",
+  });
   const { toast } = useToast();
 
   // Fetch data sources
@@ -591,7 +644,32 @@ export default function DataAnalysis() {
             {chartData.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Visualization</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>{chartConfig.title}</CardTitle>
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Settings2 className="mr-2 h-4 w-4" />
+                          Format Chart
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+                        <SheetHeader>
+                          <SheetTitle>Chart Formatting</SheetTitle>
+                          <SheetDescription>
+                            Customize number formats, units, axes, and display options
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-6">
+                          <ChartFormatter
+                            config={chartConfig}
+                            onChange={setChartConfig}
+                            availableMetrics={analysisResults?.summary?.numericColumns}
+                          />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
                   <div className="flex gap-2 mt-2">
                     {["bar", "line", "area", "pie", "scatter", "treemap"].map((type) => (
                       <Button

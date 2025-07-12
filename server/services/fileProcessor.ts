@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import Papa from 'papaparse';
 import XLSX from 'xlsx';
+import { IntelligentDataParser } from './intelligentDataParser';
 
 export interface ProcessedFile {
   name: string;
@@ -75,44 +76,68 @@ export class FileProcessor {
 
   private static async processExcel(filePath: string, originalName: string): Promise<ProcessedFile> {
     try {
-      const workbook = XLSX.readFile(filePath);
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
+      const buffer = fs.readFileSync(filePath);
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
       
-      // Convert to JSON
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-        header: 1,
-        defval: null,
-        blankrows: false 
-      }) as any[][];
-      
-      if (jsonData.length === 0) {
-        throw new Error('Excel file is empty');
-      }
-      
-      // Extract headers and data
-      const headers = jsonData[0] as string[];
-      const dataRows = jsonData.slice(1);
-      
-      // Convert to object format
-      const data = dataRows.map(row => {
-        const obj: any = {};
-        headers.forEach((header, index) => {
-          obj[header] = row[index];
+      if (workbook.SheetNames.length > 1) {
+        // Use intelligent parser for multi-sheet workbooks
+        const result = await IntelligentDataParser.parseMultiSheetExcel(buffer);
+        
+        // Combine all data for simplified processing
+        const allData = Object.values(result.data).flat();
+        const allColumns = [...new Set(result.sheets.flatMap(s => s.columns.map(c => c.standardName)))];
+        
+        return {
+          name: path.basename(originalName, path.extname(originalName)),
+          type: 'excel-multisheet',
+          schema: this.inferSchema(allData),
+          rowCount: allData.length,
+          data: allData.slice(0, 1000), // Limit to 1000 rows for performance
+          columns: allColumns,
+          sheets: result.sheets,
+          workbookSummary: result.summary,
+          multiSheetData: result.data
+        } as any;
+      } else {
+        // Single sheet - use standard processing
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+          header: 1,
+          defval: null,
+          blankrows: false 
+        }) as any[][];
+        
+        if (jsonData.length === 0) {
+          throw new Error('Excel file is empty');
+        }
+        
+        // Extract headers and data
+        const headers = jsonData[0] as string[];
+        const dataRows = jsonData.slice(1);
+        
+        // Convert to object format
+        const data = dataRows.map(row => {
+          const obj: any = {};
+          headers.forEach((header, index) => {
+            obj[header] = row[index];
+          });
+          return obj;
         });
-        return obj;
-      });
-      
-      const schema = this.inferSchema(data);
-      
-      return {
-        name: path.basename(originalName, path.extname(originalName)),
-        type: 'excel',
-        schema,
-        rowCount: data.length,
-        data: data.slice(0, 1000), // Limit to 1000 rows
-        columns: headers
-      };
+        
+        const schema = this.inferSchema(data);
+        
+        return {
+          name: path.basename(originalName, path.extname(originalName)),
+          type: 'excel',
+          schema,
+          rowCount: data.length,
+          data: data.slice(0, 1000), // Limit to 1000 rows
+          columns: headers
+        };
+      }
     } catch (error) {
       throw new Error(`Excel processing error: ${error}`);
     }
