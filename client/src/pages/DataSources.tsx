@@ -64,6 +64,38 @@ export default function DataSources() {
     }
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/data-sources/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      
+      if (!response.ok) throw new Error("Delete failed");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/data-sources"] });
+      toast({
+        title: "Data source deleted",
+        description: "The data source has been removed successfully"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Delete failed",
+        description: "There was an error deleting the data source",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleDelete = (id: number) => {
+    if (confirm("Are you sure you want to delete this data source?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
@@ -177,10 +209,11 @@ export default function DataSources() {
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: Add delete functionality
+                          handleDelete(source.id);
                         }}
+                        disabled={deleteMutation.isPending}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>
                   </div>

@@ -319,6 +319,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete data source endpoint
+  app.delete("/api/data-sources/:id", requireAuth, async (req, res) => {
+    try {
+      const dataSourceId = parseInt(req.params.id);
+      const userId = (req.user as any).id;
+      
+      // Verify ownership
+      const dataSource = await storage.getDataSource(dataSourceId);
+      if (!dataSource || dataSource.userId !== userId) {
+        return res.status(404).json({ message: "Data source not found" });
+      }
+      
+      // Delete from storage
+      const deleted = await storage.deleteDataSource(dataSourceId);
+      
+      // Remove from memory cache
+      const uploadedData = (global as any).uploadedData || {};
+      delete uploadedData[dataSourceId];
+      (global as any).uploadedData = uploadedData;
+      
+      if (deleted) {
+        res.json({ message: "Data source deleted successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to delete data source" });
+      }
+    } catch (error) {
+      console.error("Delete data source error:", error);
+      res.status(500).json({ message: "Failed to delete data source" });
+    }
+  });
+
   // SQL query routes
   app.post("/api/query/execute", requireAuth, async (req, res) => {
     try {
