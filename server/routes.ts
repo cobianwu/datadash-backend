@@ -6,10 +6,21 @@ import { setupAuth, requireAuth, hashPassword } from "./auth";
 import { FileProcessor } from "./services/fileProcessor";
 import { processAIQuery, generateSQLFromNaturalLanguage, generateChartFromDescription, generateInsights } from "./services/ai";
 import { SQLParser } from "./services/sqlParser";
+import { DataTransformer } from "./services/dataTransformer";
+import { AnalyticsEngine } from "./services/analyticsEngine";
+import { ChartGenerator } from "./services/chartGenerator";
 import { z } from "zod";
+import { analyticsRouter } from "./routes/analytics";
+import { exportRouter } from "./routes/export";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
+
+  // Register analytics routes
+  app.use('/api/analytics', analyticsRouter);
+  
+  // Register export routes
+  app.use('/api/export', exportRouter);
 
   // Auth routes
   app.post("/api/auth/login", passport.authenticate("local"), (req, res) => {
@@ -221,17 +232,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId
       });
 
+      // Clean and analyze the data
+      const cleanedData = DataTransformer.cleanData(processedFile.data || []);
+      const dataQuality = DataTransformer.analyzeDataQuality(cleanedData);
+      const analysis = AnalyticsEngine.performComprehensiveAnalysis(cleanedData);
+      
       // Store the actual data in memory for quick access
       (global as any).uploadedData = (global as any).uploadedData || {};
       (global as any).uploadedData[dataSource.id] = {
-        data: processedFile.data,
-        columns: processedFile.columns
+        data: cleanedData,
+        columns: processedFile.columns,
+        analysis,
+        dataQuality
       };
 
       res.json({
         ...dataSource,
         columns: processedFile.columns,
-        sampleData: processedFile.data?.slice(0, 5)
+        sampleData: cleanedData?.slice(0, 5),
+        dataQuality: {
+          totalRows: dataQuality.totalRows,
+          cleanRows: dataQuality.cleanRows,
+          issues: dataQuality.issues.length,
+          recommendations: dataQuality.recommendations
+        },
+        analysis: {
+          summary: analysis.summary,
+          insights: analysis.insights.slice(0, 3)
+        }
       });
     } catch (error) {
       console.error("File upload error:", error);
@@ -297,20 +325,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let columns = [];
 
       // Check for data source
+      let sourceAnalysis = null;
       if (dataSourceId && uploadedData[dataSourceId]) {
         const sourceData = uploadedData[dataSourceId];
         analysisData = sourceData.data || [];
         columns = sourceData.columns || [];
+        sourceAnalysis = sourceData.analysis;
       }
 
+      // Use analytics engine to generate smart query
+      const smartQuery = AnalyticsEngine.generateSmartQuery(analysisData, query);
+      
       // Use real AI to process the query
-      const sql = await generateSQLFromNaturalLanguage(query);
+      const sql = smartQuery.sql || await generateSQLFromNaturalLanguage(query);
       
       // Generate insights based on the actual data
-      const insights = await generateInsights(analysisData, query);
+      const engineInsights = sourceAnalysis ? sourceAnalysis.insights : [];
+      const aiInsights = await generateInsights(analysisData, query);
+      const insights = [...engineInsights, ...aiInsights].slice(0, 5);
       
-      // Suggest appropriate charts
-      const chartSuggestions = await generateChartFromDescription(query, analysisData);
+      // Get chart recommendations from chart generator
+      const chartRecommendations = ChartGenerator.recommendCharts(analysisData, query, columns);
+      const chartSuggestions = chartRecommendations.map(rec => ({
+        type: rec.type,
+        title: rec.reason,
+        config: rec.config
+      }));
 
       // Process the data based on the query
       let resultData = [];
@@ -387,6 +427,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
       }
 
+      // Generate chart data for the top recommendation
+      let chartData = null;
+      if (chartRecommendations.length > 0 && resultData.length > 0) {
+        const topChart = chartRecommendations[0];
+        chartData = ChartGenerator.generateChartData(resultData, {
+          type: topChart.type,
+          data: resultData,
+          ...topChart.config
+        });
+      }
+
       const result = {
         sql,
         data: resultData,
@@ -396,6 +447,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `Average value: ${Math.round(resultData.reduce((sum, d) => sum + d.value, 0) / resultData.length)}`
         ],
         chartSuggestions,
+        chartData,
+        queryExplanation: smartQuery.explanation,
         executionTime: Date.now() - startTime
       };
 
