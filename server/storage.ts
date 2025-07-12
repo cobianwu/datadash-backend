@@ -585,6 +585,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDataSource(id: number): Promise<boolean> {
+    // First delete any related data in data_source_data table
+    await db.delete(dataSourceData).where(eq(dataSourceData.dataSourceId, id));
+    
+    // Then delete the data source itself
     await db.delete(dataSources).where(eq(dataSources.id, id));
     return true;
   }

@@ -14,6 +14,7 @@ import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
 import { advancedAnalyticsRouter } from "./routes/advancedAnalytics";
 import { RealtimeService } from "./services/realtimeService";
+import * as Papa from "papaparse";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
@@ -380,7 +381,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Convert data to CSV format
-      const Papa = require("papaparse");
       const csv = Papa.unparse(storedData.data);
       
       // Set headers for file download
