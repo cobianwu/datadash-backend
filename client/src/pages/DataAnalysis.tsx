@@ -25,6 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { DataCleaner } from "@/components/DataCleaner";
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
@@ -416,17 +417,21 @@ export default function DataAnalysis() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-5 w-full max-w-3xl">
             <TabsTrigger value="upload" className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               Upload
+            </TabsTrigger>
+            <TabsTrigger value="clean" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Clean
             </TabsTrigger>
             <TabsTrigger value="analyze" className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
               Analyze
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
+              <TrendingUp className="h-4 w-4" />
               Insights
             </TabsTrigger>
             <TabsTrigger value="export" className="flex items-center gap-2">
@@ -493,6 +498,34 @@ export default function DataAnalysis() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="clean" className="space-y-6">
+            {selectedDataSource ? (
+              <DataCleaner 
+                dataSourceId={parseInt(selectedDataSource)} 
+                dataQuality={dataQuality}
+                onCleanComplete={() => {
+                  queryClient.invalidateQueries({ queryKey: ["/api/data-sources"] });
+                  setActiveTab("analyze");
+                }}
+              />
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center space-y-4">
+                    <Database className="h-12 w-12 mx-auto text-muted-foreground" />
+                    <h3 className="text-lg font-medium">No Data Selected</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Upload a file or select an existing data source to start cleaning and organizing your data
+                    </p>
+                    <Button onClick={() => setActiveTab("upload")} variant="outline">
+                      Go to Upload
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="analyze" className="space-y-6">

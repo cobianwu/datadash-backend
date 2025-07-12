@@ -13,6 +13,7 @@ import { z } from "zod";
 import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
 import { advancedAnalyticsRouter } from "./routes/advancedAnalytics";
+import { dataCleanRouter } from "./routes/dataClean";
 import { RealtimeService } from "./services/realtimeService";
 import Papa from "papaparse";
 
@@ -27,6 +28,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register advanced analytics routes
   app.use('/api/advanced-analytics', advancedAnalyticsRouter);
+  
+  // Register data cleaning routes
+  app.use('/api', dataCleanRouter);
 
   // Auth routes
   app.post("/api/auth/login", passport.authenticate("local"), (req, res) => {
