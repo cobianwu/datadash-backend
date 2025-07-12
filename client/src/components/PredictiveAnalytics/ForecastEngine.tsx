@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,8 +24,12 @@ import {
   Target, 
   Brain,
   Zap,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/api";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ForecastData {
   period: string;
@@ -51,11 +55,63 @@ interface ForecastEngineProps {
 }
 
 export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
-  const [selectedCompany, setSelectedCompany] = useState("techcorp");
-  const [selectedMetric, setSelectedMetric] = useState("revenue");
+  const [selectedMetric, setSelectedMetric] = useState("");
+  const [selectedTimeColumn, setSelectedTimeColumn] = useState("");
   const [forecastHorizon, setForecastHorizon] = useState("12");
+  const [columns, setColumns] = useState<string[]>([]);
 
-  const revenueData: ForecastData[] = [
+  // Fetch data source info to get available columns
+  const { data: dataSourceInfo, isLoading: columnsLoading } = useQuery({
+    queryKey: ['/api/data-sources', dataSourceId, 'preview'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/data-sources/${dataSourceId}/preview`);
+      if (response.preview && response.preview.length > 0) {
+        const cols = Object.keys(response.preview[0]);
+        setColumns(cols);
+        // Auto-select first numeric column as metric
+        const numericCol = cols.find(col => {
+          const val = response.preview[0][col];
+          return !isNaN(parseFloat(val));
+        });
+        if (numericCol) setSelectedMetric(numericCol);
+        // Auto-select first date-like column
+        const dateCol = cols.find(col => 
+          col.toLowerCase().includes('date') || 
+          col.toLowerCase().includes('month') || 
+          col.toLowerCase().includes('year') ||
+          col.toLowerCase().includes('time')
+        );
+        if (dateCol) setSelectedTimeColumn(dateCol);
+      }
+      return response;
+    },
+    enabled: !!dataSourceId
+  });
+
+  // Generate forecast
+  const forecastMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/advanced-analytics/forecast', {
+        dataSourceId: parseInt(dataSourceId),
+        timeColumn: selectedTimeColumn,
+        valueColumn: selectedMetric,
+        horizon: parseInt(forecastHorizon)
+      });
+    }
+  });
+
+  // Detect anomalies
+  const anomalyMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/advanced-analytics/anomaly-detection', {
+        dataSourceId: parseInt(dataSourceId),
+        column: selectedMetric,
+        method: 'z-score'
+      });
+    }
+  });
+
+  const revenueData: ForecastData[] = forecastMutation.data?.forecast || [
     { period: "2021 Q1", actual: 45, forecast: 45, lower: 43, upper: 47, confidence: 0.95 },
     { period: "2021 Q2", actual: 48, forecast: 47, lower: 45, upper: 49, confidence: 0.93 },
     { period: "2021 Q3", actual: 52, forecast: 50, lower: 48, upper: 52, confidence: 0.91 },
@@ -70,7 +126,7 @@ export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
     { period: "2023 Q4", forecast: 86, lower: 79, upper: 93, confidence: 0.73 },
   ];
 
-  const anomalies: AnomalyData[] = [
+  const anomalies: AnomalyData[] = anomalyMutation.data?.anomalies || [
     {
       company: "TechCorp",
       metric: "Revenue Growth",
@@ -155,15 +211,14 @@ export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
 
         <TabsContent value="forecasting" className="space-y-4">
           <div className="flex gap-4 mb-4">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <Select value={selectedTimeColumn} onValueChange={setSelectedTimeColumn}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Select company" />
+                <SelectValue placeholder="Select time column" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="techcorp">TechCorp</SelectItem>
-                <SelectItem value="meddevice">MedDevice</SelectItem>
-                <SelectItem value="fintech">FinTech</SelectItem>
-                <SelectItem value="retailchain">RetailChain</SelectItem>
+                {columns.map(col => (
+                  <SelectItem key={col} value={col}>{col}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -172,35 +227,61 @@ export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
                 <SelectValue placeholder="Select metric" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="revenue">Revenue</SelectItem>
-                <SelectItem value="ebitda">EBITDA</SelectItem>
-                <SelectItem value="margin">EBITDA Margin</SelectItem>
-                <SelectItem value="growth">Growth Rate</SelectItem>
+                {columns.filter(col => {
+                  const val = dataSourceInfo?.preview?.[0]?.[col];
+                  return !isNaN(parseFloat(val));
+                }).map(col => (
+                  <SelectItem key={col} value={col}>{col}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
             <Select value={forecastHorizon} onValueChange={setForecastHorizon}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Forecast horizon" />
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Periods" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="6">6 Months</SelectItem>
-                <SelectItem value="12">12 Months</SelectItem>
-                <SelectItem value="24">24 Months</SelectItem>
-                <SelectItem value="36">36 Months</SelectItem>
+                <SelectItem value="6">6 periods</SelectItem>
+                <SelectItem value="12">12 periods</SelectItem>
+                <SelectItem value="24">24 periods</SelectItem>
               </SelectContent>
             </Select>
+
+            <Button 
+              onClick={() => forecastMutation.mutate()}
+              disabled={!selectedTimeColumn || !selectedMetric || forecastMutation.isPending}
+            >
+              {forecastMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Generate Forecast
+            </Button>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Revenue Forecast with Confidence Intervals
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
+          {columnsLoading && (
+            <Card>
+              <CardContent className="flex items-center justify-center h-96">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </CardContent>
+            </Card>
+          )}
+
+          {forecastMutation.isError && (
+            <Alert>
+              <AlertDescription>
+                Failed to generate forecast. Please check your data and try again.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {revenueData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  {selectedMetric} Forecast with Confidence Intervals
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={400}>
                 <AreaChart data={revenueData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="period" />
@@ -246,6 +327,7 @@ export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
@@ -281,6 +363,38 @@ export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
         </TabsContent>
 
         <TabsContent value="anomalies" className="space-y-4">
+          <div className="flex gap-4 mb-4">
+            <Select value={selectedMetric} onValueChange={setSelectedMetric}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select metric to analyze" />
+              </SelectTrigger>
+              <SelectContent>
+                {columns.filter(col => {
+                  const val = dataSourceInfo?.preview?.[0]?.[col];
+                  return !isNaN(parseFloat(val));
+                }).map(col => (
+                  <SelectItem key={col} value={col}>{col}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button 
+              onClick={() => anomalyMutation.mutate()}
+              disabled={!selectedMetric || anomalyMutation.isPending}
+            >
+              {anomalyMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Detect Anomalies
+            </Button>
+          </div>
+
+          {anomalyMutation.isError && (
+            <Alert>
+              <AlertDescription>
+                Failed to detect anomalies. Please check your data and try again.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

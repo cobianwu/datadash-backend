@@ -53,6 +53,136 @@ advancedAnalyticsRouter.post('/statistical-test', requireAuth, async (req, res) 
   }
 });
 
+// Forecast generation
+advancedAnalyticsRouter.post('/forecast', requireAuth, async (req, res) => {
+  try {
+    const { dataSourceId, timeColumn, valueColumn, horizon = 12 } = req.body;
+    
+    // Get data from storage
+    const storedData = await storage.getDataSourceData(dataSourceId);
+    if (!storedData) {
+      return res.status(404).json({ message: 'Data not found' });
+    }
+
+    const { data } = storedData;
+    
+    // Extract time series data
+    const timeSeriesData = data
+      .map(row => ({
+        time: row[timeColumn],
+        value: parseFloat(row[valueColumn])
+      }))
+      .filter(item => !isNaN(item.value))
+      .sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+    if (timeSeriesData.length === 0) {
+      return res.status(400).json({ message: 'No valid time series data found' });
+    }
+
+    // Simple linear regression for forecasting
+    const n = timeSeriesData.length;
+    const xValues = Array.from({ length: n }, (_, i) => i);
+    const yValues = timeSeriesData.map(d => d.value);
+    
+    const meanX = xValues.reduce((a, b) => a + b, 0) / n;
+    const meanY = yValues.reduce((a, b) => a + b, 0) / n;
+    
+    const slope = xValues.reduce((sum, x, i) => sum + (x - meanX) * (yValues[i] - meanY), 0) /
+                  xValues.reduce((sum, x) => sum + (x - meanX) ** 2, 0);
+    const intercept = meanY - slope * meanX;
+
+    // Generate forecast
+    const forecast = [];
+    const lastIndex = n - 1;
+    
+    // Add historical data
+    timeSeriesData.forEach((item, i) => {
+      forecast.push({
+        period: item.time,
+        actual: item.value,
+        forecast: intercept + slope * i,
+        lower: (intercept + slope * i) * 0.9,
+        upper: (intercept + slope * i) * 1.1,
+        confidence: 0.95
+      });
+    });
+    
+    // Add future predictions
+    for (let i = 1; i <= horizon; i++) {
+      const futureValue = intercept + slope * (lastIndex + i);
+      forecast.push({
+        period: `Period ${n + i}`,
+        forecast: futureValue,
+        lower: futureValue * 0.8,
+        upper: futureValue * 1.2,
+        confidence: Math.max(0.7, 0.95 - i * 0.02)
+      });
+    }
+
+    res.json({ forecast });
+  } catch (error) {
+    console.error('Forecast error:', error);
+    res.status(500).json({ message: 'Failed to generate forecast' });
+  }
+});
+
+// Anomaly detection
+advancedAnalyticsRouter.post('/anomaly-detection', requireAuth, async (req, res) => {
+  try {
+    const { dataSourceId, column, method = 'z-score' } = req.body;
+    
+    // Get data from storage
+    const storedData = await storage.getDataSourceData(dataSourceId);
+    if (!storedData) {
+      return res.status(404).json({ message: 'Data not found' });
+    }
+
+    const { data } = storedData;
+    
+    // Extract numeric values
+    const values = data
+      .map(row => parseFloat(row[column]))
+      .filter(val => !isNaN(val));
+
+    if (values.length === 0) {
+      return res.status(400).json({ message: 'No numeric data found in column' });
+    }
+
+    // Calculate statistics
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const stdDev = Math.sqrt(
+      values.reduce((sum, val) => sum + (val - mean) ** 2, 0) / values.length
+    );
+
+    // Detect anomalies using Z-score
+    const anomalies = [];
+    const threshold = 2; // Standard deviations from mean
+
+    data.forEach((row, index) => {
+      const value = parseFloat(row[column]);
+      if (!isNaN(value)) {
+        const zScore = Math.abs((value - mean) / stdDev);
+        if (zScore > threshold) {
+          anomalies.push({
+            company: row.company || row.name || `Row ${index + 1}`,
+            metric: column,
+            current: value,
+            expected: mean,
+            deviation: value - mean,
+            severity: zScore > 3 ? 'high' : 'medium',
+            trend: value > mean ? 'declining' : 'improving'
+          });
+        }
+      }
+    });
+
+    res.json({ anomalies, statistics: { mean, stdDev, total: values.length } });
+  } catch (error) {
+    console.error('Anomaly detection error:', error);
+    res.status(500).json({ message: 'Failed to detect anomalies' });
+  }
+});
+
 // Predictive modeling
 advancedAnalyticsRouter.post('/predictive-model', requireAuth, async (req, res) => {
   try {
