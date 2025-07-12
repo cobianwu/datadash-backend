@@ -76,7 +76,10 @@ export default function DataAnalysis() {
       const response = await fetch("/api/ai/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ 
+          query,
+          dataSourceId: selectedDataSource ? parseInt(selectedDataSource) : null 
+        }),
         credentials: "include"
       });
       

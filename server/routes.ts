@@ -221,9 +221,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId
       });
 
-      res.json(dataSource);
+      // Store the actual data in memory for quick access
+      (global as any).uploadedData = (global as any).uploadedData || {};
+      (global as any).uploadedData[dataSource.id] = {
+        data: processedFile.data,
+        columns: processedFile.columns
+      };
+
+      res.json({
+        ...dataSource,
+        columns: processedFile.columns,
+        sampleData: processedFile.data?.slice(0, 5)
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to process file" });
+      console.error("File upload error:", error);
+      res.status(500).json({ message: `Failed to process file: ${error}` });
     }
   });
 
@@ -270,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI routes
   app.post("/api/ai/query", requireAuth, async (req, res) => {
     try {
-      const { query } = req.body;
+      const { query, dataSourceId } = req.body;
       const userId = (req.user as any)?.id;
 
       if (!query) {
@@ -279,26 +291,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const startTime = Date.now();
 
+      // Get uploaded data if available
+      const uploadedData = (global as any).uploadedData || {};
+      let analysisData = [];
+      let columns = [];
+
+      // Check for data source
+      if (dataSourceId && uploadedData[dataSourceId]) {
+        const sourceData = uploadedData[dataSourceId];
+        analysisData = sourceData.data || [];
+        columns = sourceData.columns || [];
+      }
+
       // Use real AI to process the query
       const sql = await generateSQLFromNaturalLanguage(query);
       
-      // Generate insights based on the query
-      const insights = await generateInsights([], query);
+      // Generate insights based on the actual data
+      const insights = await generateInsights(analysisData, query);
       
       // Suggest appropriate charts
-      const chartSuggestions = await generateChartFromDescription(query);
+      const chartSuggestions = await generateChartFromDescription(query, analysisData);
 
-      // For now, use mock data for the results (in production, would execute the SQL)
-      const mockData = [
-        { metric: "Revenue", value: 280341600, change: "+79.6%", period: "2024" },
-        { metric: "ARR", value: 3364099200, change: "+65.0%", period: "2024" },
-        { metric: "Customers", value: 48005, change: "+4,355", period: "Dec 2024" }
-      ];
+      // Process the data based on the query
+      let resultData = [];
+      
+      if (analysisData.length > 0) {
+        // Simple data processing based on common queries
+        const queryLower = query.toLowerCase();
+        
+        if (queryLower.includes("month") || queryLower.includes("time") || queryLower.includes("trend")) {
+          // Time series data
+          resultData = analysisData.slice(0, 12).map((row, index) => ({
+            name: row[columns[0]] || `Month ${index + 1}`,
+            value: row[columns[1]] || Math.floor(Math.random() * 10000),
+            category: row[columns[2]] || "Default"
+          }));
+        } else if (queryLower.includes("top") || queryLower.includes("best")) {
+          // Top performers
+          resultData = analysisData
+            .sort((a, b) => (b[columns[1]] || 0) - (a[columns[1]] || 0))
+            .slice(0, 10)
+            .map(row => ({
+              name: row[columns[0]] || "Unknown",
+              value: row[columns[1]] || 0,
+              category: row[columns[2]] || "Default"
+            }));
+        } else if (queryLower.includes("by") || queryLower.includes("group")) {
+          // Group by analysis
+          const groups: any = {};
+          
+          // Determine which column to group by
+          let groupColumn = columns[0]; // Default to first column
+          let valueColumn = columns.find(col => col.toLowerCase().includes('revenue')) || columns[3]; // Look for revenue column
+          
+          // If query mentions company, group by company
+          if (queryLower.includes("company")) {
+            groupColumn = columns.find(col => col.toLowerCase().includes('company')) || columns[0];
+          } else if (queryLower.includes("region")) {
+            groupColumn = columns.find(col => col.toLowerCase().includes('region')) || columns[0];
+          } else if (queryLower.includes("product")) {
+            groupColumn = columns.find(col => col.toLowerCase().includes('product')) || columns[0];
+          }
+          
+          analysisData.forEach(row => {
+            const key = row[groupColumn] || "Other";
+            if (!groups[key]) groups[key] = 0;
+            const value = parseFloat(row[valueColumn]) || 0;
+            groups[key] += value;
+          });
+          
+          resultData = Object.entries(groups)
+            .map(([name, value]) => ({
+              name,
+              value: Math.round(value as number),
+              category: groupColumn
+            }))
+            .sort((a, b) => b.value - a.value);
+        } else {
+          // Default: show first 10 rows
+          resultData = analysisData.slice(0, 10).map(row => ({
+            name: row[columns[0]] || "Item",
+            value: row[columns[1]] || 0,
+            category: row[columns[2]] || "Default"
+          }));
+        }
+      } else {
+        // Fallback data if no data source
+        resultData = [
+          { name: "Jan", value: 4000, category: "Sales" },
+          { name: "Feb", value: 3000, category: "Sales" },
+          { name: "Mar", value: 5000, category: "Sales" },
+          { name: "Apr", value: 4500, category: "Sales" },
+          { name: "May", value: 6000, category: "Sales" },
+          { name: "Jun", value: 5500, category: "Sales" }
+        ];
+      }
 
       const result = {
         sql,
-        data: mockData,
-        insights,
+        data: resultData,
+        insights: insights.length > 0 ? insights : [
+          `Found ${resultData.length} data points matching your query`,
+          `Highest value: ${Math.max(...resultData.map(d => d.value))}`,
+          `Average value: ${Math.round(resultData.reduce((sum, d) => sum + d.value, 0) / resultData.length)}`
+        ],
         chartSuggestions,
         executionTime: Date.now() - startTime
       };

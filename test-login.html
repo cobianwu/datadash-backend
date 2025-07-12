@@ -1,39 +1,176 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test Login</title>
+    <title>DataFlow Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .result { background: #f0f0f0; padding: 10px; margin-top: 10px; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
 </head>
 <body>
-    <h2>Login Test</h2>
-    <form id="loginForm">
-        <input type="text" id="username" placeholder="Username" value="demo">
-        <input type="password" id="password" placeholder="Password" value="demo">
-        <button type="submit">Login</button>
-    </form>
-    <div id="result"></div>
+    <h1>DataFlow Analytics - Test Suite</h1>
     
+    <div class="section">
+        <h2>1. Authentication Test</h2>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="authResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. File Upload Test</h2>
+        <input type="file" id="fileInput" accept=".csv,.xlsx,.json">
+        <button onclick="testUpload()">Upload File</button>
+        <div id="uploadResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. AI Query Test</h2>
+        <input type="text" id="queryInput" placeholder="Enter your query" style="width: 400px; padding: 5px;">
+        <button onclick="testQuery()">Run Query</button>
+        <div id="queryResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>4. Chart Preview</h2>
+        <canvas id="chartCanvas" width="600" height="400" style="border: 1px solid #ddd;"></canvas>
+    </div>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
+        let currentDataSourceId = null;
+
+        async function testLogin() {
+            const result = document.getElementById('authResult');
             try {
-                const response = await fetch('http://localhost:5000/api/auth/login', {
+                const response = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ username, password }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'demo', password: 'demo' }),
                     credentials: 'include'
                 });
                 
-                const data = await response.json();
-                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = '<span class="success">✓ Login successful! User: ' + data.user.username + '</span>';
+                } else {
+                    result.innerHTML = '<span class="error">✗ Login failed</span>';
+                }
             } catch (error) {
-                document.getElementById('result').innerHTML = `Error: ${error.message}`;
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
             }
-        });
+        }
+
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const result = document.getElementById('uploadResult');
+            
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<span class="error">Please select a file</span>';
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/api/data-sources/upload', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentDataSourceId = data.id;
+                    result.innerHTML = '<span class="success">✓ File uploaded! ID: ' + data.id + 
+                        ', Rows: ' + data.rowCount + ', Columns: ' + (data.columns ? data.columns.join(', ') : 'N/A') + '</span>';
+                } else {
+                    result.innerHTML = '<span class="error">✗ Upload failed: ' + await response.text() + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        async function testQuery() {
+            const query = document.getElementById('queryInput').value;
+            const result = document.getElementById('queryResult');
+            
+            if (!query) {
+                result.innerHTML = '<span class="error">Please enter a query</span>';
+                return;
+            }
+            
+            try {
+                result.innerHTML = 'Processing query...';
+                const response = await fetch('/api/ai/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: query,
+                        dataSourceId: currentDataSourceId 
+                    }),
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = '<span class="success">✓ Query completed!</span><br>' +
+                        'Execution time: ' + data.executionTime + 'ms<br>' +
+                        'Data points: ' + (data.data ? data.data.length : 0) + '<br>' +
+                        'Chart suggestions: ' + (data.chartSuggestions ? data.chartSuggestions.map(c => c.type).join(', ') : 'None');
+                    
+                    // Draw simple chart
+                    if (data.data && data.data.length > 0) {
+                        drawChart(data.data);
+                    }
+                } else {
+                    result.innerHTML = '<span class="error">✗ Query failed: ' + await response.text() + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        function drawChart(data) {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Simple bar chart
+            const barWidth = canvas.width / data.length;
+            const maxValue = Math.max(...data.map(d => d.value));
+            
+            data.forEach((item, index) => {
+                const barHeight = (item.value / maxValue) * (canvas.height - 40);
+                const x = index * barWidth + 10;
+                const y = canvas.height - barHeight - 20;
+                
+                // Draw bar
+                ctx.fillStyle = '#3b82f6';
+                ctx.fillRect(x, y, barWidth - 20, barHeight);
+                
+                // Draw label
+                ctx.fillStyle = '#000';
+                ctx.font = '10px Arial';
+                ctx.save();
+                ctx.translate(x + barWidth/2, canvas.height - 5);
+                ctx.rotate(-0.5);
+                ctx.textAlign = 'center';
+                ctx.fillText(item.name, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        // Auto-login on load
+        window.onload = () => {
+            testLogin();
+        };
     </script>
 </body>
 </html>
