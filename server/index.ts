@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { RedisService } from "./services/redisService";
+import { DuckDBService } from "./services/duckdbService";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +39,21 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize services with error handling
+  try {
+    const redis = RedisService.getInstance();
+    console.log('Redis service initialized');
+  } catch (error) {
+    console.log('Redis service unavailable, continuing without caching');
+  }
+  
+  try {
+    const duckdb = DuckDBService.getInstance();
+    console.log('DuckDB service initialized');
+  } catch (error) {
+    console.log('DuckDB service unavailable, continuing without advanced SQL features');
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

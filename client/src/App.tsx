@@ -16,6 +16,7 @@ import AIAssistant from "@/pages/AIAssistant";
 import Portfolio from "@/pages/Portfolio";
 import Warehouses from "@/pages/Warehouses";
 import Demo from "@/pages/Demo";
+import CustomDashboard from "@/pages/CustomDashboard";
 import { useAuth } from "@/hooks/useAuth";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/ai" component={() => <ProtectedRoute component={AIAssistant} />} />
       <Route path="/portfolio" component={() => <ProtectedRoute component={Portfolio} />} />
       <Route path="/warehouses" component={() => <ProtectedRoute component={Warehouses} />} />
+      <Route path="/custom-dashboard" component={() => <ProtectedRoute component={CustomDashboard} />} />
       <Route path="/demo" component={() => <ProtectedRoute component={Demo} />} />
       <Route path="/login" component={Login} />
       <Route component={NotFound} />

@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { Upload, Database, FileText, RefreshCw, Trash2 } from "lucide-react";
+import { Upload, Database, FileText, RefreshCw, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { DataPreview } from "@/components/DataPreview";
 
 export default function DataSources() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [selectedDataSource, setSelectedDataSource] = useState<any>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { toast } = useToast();
 
   const { data: dataSources, isLoading } = useQuery({
@@ -130,7 +133,14 @@ export default function DataSources() {
             </Card>
           ) : (
             dataSources?.map((source: any) => (
-              <Card key={source.id}>
+              <Card 
+                key={source.id} 
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => {
+                  setSelectedDataSource(source);
+                  setPreviewOpen(true);
+                }}
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -151,7 +161,25 @@ export default function DataSources() {
                       }`}>
                         {source.status || 'processing'}
                       </span>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDataSource(source);
+                          setPreviewOpen(true);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Add delete functionality
+                        }}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -183,6 +211,16 @@ export default function DataSources() {
             ))
           )}
         </div>
+
+        {/* Data Preview Dialog */}
+        <DataPreview 
+          dataSource={selectedDataSource}
+          isOpen={previewOpen}
+          onClose={() => {
+            setPreviewOpen(false);
+            setSelectedDataSource(null);
+          }}
+        />
       </div>
     </AppLayout>
   );

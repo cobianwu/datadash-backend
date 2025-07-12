@@ -6,7 +6,8 @@ import {
   Briefcase, 
   Brain, 
   Server,
-  BarChart3
+  BarChart3,
+  Grid
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +16,7 @@ const navigation = [
   { name: "Data Analysis", href: "/data-analysis", icon: BarChart3 },
   { name: "Data Sources", href: "/data-sources", icon: Database },
   { name: "Advanced Analytics", href: "/analytics", icon: LineChart },
+  { name: "Custom Dashboard", href: "/custom-dashboard", icon: Grid },
   { name: "Due Diligence", href: "/due-diligence", icon: Briefcase },
   { name: "Portfolio", href: "/portfolio", icon: Briefcase },
   { name: "AI Assistant", href: "/ai", icon: Brain },

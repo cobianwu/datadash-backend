@@ -12,6 +12,8 @@ import { ChartGenerator } from "./services/chartGenerator";
 import { z } from "zod";
 import { analyticsRouter } from "./routes/analytics";
 import { exportRouter } from "./routes/export";
+import { advancedAnalyticsRouter } from "./routes/advancedAnalytics";
+import { RealtimeService } from "./services/realtimeService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
@@ -21,6 +23,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register export routes
   app.use('/api/export', exportRouter);
+  
+  // Register advanced analytics routes
+  app.use('/api/advanced-analytics', advancedAnalyticsRouter);
 
   // Auth routes
   app.post("/api/auth/login", passport.authenticate("local"), (req, res) => {
@@ -273,6 +278,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("File upload error:", error);
       res.status(500).json({ message: `Failed to process file: ${error}` });
+    }
+  });
+
+  // Data sources preview endpoint
+  app.get("/api/data-sources/:id/preview", requireAuth, async (req, res) => {
+    try {
+      const dataSource = await storage.getDataSource(parseInt(req.params.id));
+      
+      if (!dataSource || dataSource.userId !== req.user!.id) {
+        return res.status(404).json({ message: "Data source not found" });
+      }
+
+      // Get data from storage
+      const storedData = await storage.getDataSourceData(dataSource.id);
+      
+      if (storedData && storedData.data) {
+        // Return first 20 rows for preview
+        const previewData = storedData.data.slice(0, 20);
+        return res.json({ 
+          preview: previewData,
+          totalRows: storedData.data.length,
+          columns: storedData.columns
+        });
+      }
+
+      // If no data in storage, return sample data if available
+      if (dataSource.sampleData) {
+        return res.json({ 
+          preview: dataSource.sampleData.slice(0, 20),
+          totalRows: dataSource.rowCount || 0,
+          columns: dataSource.columns || []
+        });
+      }
+
+      res.json({ preview: [], totalRows: 0, columns: [] });
+    } catch (error) {
+      console.error("Error fetching preview:", error);
+      res.status(500).json({ message: "Failed to fetch preview" });
     }
   });
 
@@ -667,5 +710,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Initialize RealtimeService with the server
+  RealtimeService.initialize(httpServer);
+  
   return httpServer;
 }
