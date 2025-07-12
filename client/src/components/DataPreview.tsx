@@ -16,6 +16,8 @@ interface DataPreviewProps {
 
 export function DataPreview({ dataSource, isOpen, onClose }: DataPreviewProps) {
   const [previewData, setPreviewData] = useState<any[]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -33,6 +35,8 @@ export function DataPreview({ dataSource, isOpen, onClose }: DataPreviewProps) {
       if (response.ok) {
         const data = await response.json();
         setPreviewData(data.preview || []);
+        setColumns(data.columns || dataSource.columns || []);
+        setTotalRows(data.totalRows || dataSource.rowCount || 0);
       }
     } catch (error) {
       console.error("Error fetching preview:", error);
@@ -43,7 +47,6 @@ export function DataPreview({ dataSource, isOpen, onClose }: DataPreviewProps) {
 
   if (!dataSource) return null;
 
-  const columns = dataSource.columns || [];
   const schema = dataSource.schema || {};
   const dataQuality = dataSource.dataQuality || {};
 
@@ -110,7 +113,7 @@ export function DataPreview({ dataSource, isOpen, onClose }: DataPreviewProps) {
               </ScrollArea>
             </div>
             <p className="text-sm text-muted-foreground">
-              Showing first {previewData.length} rows of {dataSource.rowCount} total rows
+              Showing first {previewData.length} rows of {totalRows} total rows
             </p>
           </TabsContent>
 

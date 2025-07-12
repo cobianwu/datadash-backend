@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { Upload, Database, FileText, RefreshCw, Trash2, Eye } from "lucide-react";
+import { Upload, Database, FileText, RefreshCw, Trash2, Eye, Download } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DataPreview } from "@/components/DataPreview";
@@ -93,6 +93,47 @@ export default function DataSources() {
   const handleDelete = (id: number) => {
     if (confirm("Are you sure you want to delete this data source?")) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const handleDownload = async (id: number, name: string) => {
+    try {
+      const response = await fetch(`/api/data-sources/${id}/download`, {
+        method: "GET",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+      
+      // Create a blob from the response
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and click it
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Download started",
+        description: "Your file is being downloaded"
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "There was an error downloading the file",
+        variant: "destructive"
+      });
     }
   };
 
@@ -203,6 +244,16 @@ export default function DataSources() {
                         }}
                       >
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(source.id, source.name);
+                        }}
+                      >
+                        <Download className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 

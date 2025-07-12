@@ -290,32 +290,107 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Data source not found" });
       }
 
+      console.log("Fetching preview for data source:", dataSource.id);
+
+      // Try to get data from memory first
+      const uploadedData = (global as any).uploadedData || {};
+      const memoryData = uploadedData[dataSource.id];
+      
+      if (memoryData && memoryData.data) {
+        console.log("Found data in memory:", memoryData.data.length, "rows");
+        const previewData = memoryData.data.slice(0, 20);
+        return res.json({ 
+          preview: previewData,
+          totalRows: memoryData.data.length,
+          columns: memoryData.columns || dataSource.columns || []
+        });
+      }
+
       // Get data from storage
       const storedData = await storage.getDataSourceData(dataSource.id);
+      console.log("Stored data result:", storedData ? "found" : "not found");
       
-      if (storedData && storedData.data) {
+      if (storedData && storedData.data && storedData.data.length > 0) {
         // Return first 20 rows for preview
         const previewData = storedData.data.slice(0, 20);
+        
+        // Cache in memory for future use
+        uploadedData[dataSource.id] = storedData;
+        (global as any).uploadedData = uploadedData;
+        
         return res.json({ 
           preview: previewData,
           totalRows: storedData.data.length,
-          columns: storedData.columns
+          columns: storedData.columns || dataSource.columns || []
         });
       }
 
-      // If no data in storage, return sample data if available
-      if (dataSource.sampleData) {
-        return res.json({ 
-          preview: dataSource.sampleData.slice(0, 20),
-          totalRows: dataSource.rowCount || 0,
-          columns: dataSource.columns || []
-        });
+      // Try to load from file if available
+      if (dataSource.filePath) {
+        try {
+          const fs = require("fs");
+          if (fs.existsSync(dataSource.filePath)) {
+            const processedFile = await FileProcessor.processFile(dataSource.filePath, dataSource.fileName || "file");
+            if (processedFile.data && processedFile.data.length > 0) {
+              const previewData = processedFile.data.slice(0, 20);
+              
+              // Store for future use
+              await storage.storeDataSourceData(
+                dataSource.id,
+                processedFile.data,
+                processedFile.columns,
+                null,
+                null
+              );
+              
+              return res.json({ 
+                preview: previewData,
+                totalRows: processedFile.data.length,
+                columns: processedFile.columns || []
+              });
+            }
+          }
+        } catch (fileError) {
+          console.error("Error loading from file:", fileError);
+        }
       }
 
-      res.json({ preview: [], totalRows: 0, columns: [] });
+      console.log("No data found for preview");
+      res.json({ preview: [], totalRows: 0, columns: dataSource.columns || [] });
     } catch (error) {
       console.error("Error fetching preview:", error);
       res.status(500).json({ message: "Failed to fetch preview" });
+    }
+  });
+
+  // Download data source endpoint
+  app.get("/api/data-sources/:id/download", requireAuth, async (req, res) => {
+    try {
+      const dataSource = await storage.getDataSource(parseInt(req.params.id));
+      
+      if (!dataSource || dataSource.userId !== req.user!.id) {
+        return res.status(404).json({ message: "Data source not found" });
+      }
+
+      // Get data from storage
+      const storedData = await storage.getDataSourceData(dataSource.id);
+      
+      if (!storedData || !storedData.data) {
+        return res.status(404).json({ message: "Data not found" });
+      }
+
+      // Convert data to CSV format
+      const Papa = require("papaparse");
+      const csv = Papa.unparse(storedData.data);
+      
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${dataSource.name}.csv"`);
+      
+      res.send(csv);
+    } catch (error) {
+      console.error("Download error:", error);
+      res.status(500).json({ message: "Failed to download data source" });
     }
   });
 
@@ -340,13 +415,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (global as any).uploadedData = uploadedData;
       
       if (deleted) {
-        res.json({ message: "Data source deleted successfully" });
+        res.json({ success: true, message: "Data source deleted successfully" });
       } else {
-        res.status(500).json({ message: "Failed to delete data source" });
+        res.status(500).json({ success: false, message: "Failed to delete data source" });
       }
     } catch (error) {
       console.error("Delete data source error:", error);
-      res.status(500).json({ message: "Failed to delete data source" });
+      res.status(500).json({ success: false, message: "Failed to delete data source" });
     }
   });
 
