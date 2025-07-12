@@ -34,20 +34,27 @@ interface ChatMessage {
   results?: QueryResult;
 }
 
-export function QueryInterface() {
+interface QueryInterfaceProps {
+  dataSourceId: string;
+}
+
+export function QueryInterface({ dataSourceId }: QueryInterfaceProps) {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
       type: "assistant",
-      content: "Hi! I'm your AI data analyst. Ask me anything about your portfolio companies, financial metrics, or market trends. Try questions like 'Show me top performing companies by revenue growth' or 'What's the average EBITDA margin by sector?'",
+      content: "Hi! I'm your AI data analyst. I'm ready to analyze your uploaded data. Ask me questions like 'Show me revenue trends' or 'What are the top performing products?'",
       timestamp: new Date()
     }
   ]);
 
   const queryMutation = useMutation({
     mutationFn: async (question: string) => {
-      return apiRequest("POST", "/api/ai/query", { query: question });
+      return apiRequest("POST", "/api/ai/query", { 
+        query: question,
+        dataSourceId: parseInt(dataSourceId)
+      });
     },
     onSuccess: (result) => {
       const assistantMessage: ChatMessage = {

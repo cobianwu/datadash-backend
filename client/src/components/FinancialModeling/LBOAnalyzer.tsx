@@ -27,7 +27,11 @@ interface LBOResults {
   exitValue: number;
 }
 
-export function LBOAnalyzer() {
+interface LBOAnalyzerProps {
+  dataSourceId: string;
+}
+
+export function LBOAnalyzer({ dataSourceId }: LBOAnalyzerProps) {
   const [metrics, setMetrics] = useState<LBOMetrics>({
     purchasePrice: 100,
     debtToEquity: 0.6,

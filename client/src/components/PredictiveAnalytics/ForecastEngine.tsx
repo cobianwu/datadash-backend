@@ -46,7 +46,11 @@ interface AnomalyData {
   trend: "improving" | "declining" | "stable";
 }
 
-export function ForecastEngine() {
+interface ForecastEngineProps {
+  dataSourceId: string;
+}
+
+export function ForecastEngine({ dataSourceId }: ForecastEngineProps) {
   const [selectedCompany, setSelectedCompany] = useState("techcorp");
   const [selectedMetric, setSelectedMetric] = useState("revenue");
   const [forecastHorizon, setForecastHorizon] = useState("12");

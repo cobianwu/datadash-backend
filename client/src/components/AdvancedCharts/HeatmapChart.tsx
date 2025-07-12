@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/api";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface HeatmapData {
   company: string;
@@ -16,13 +19,30 @@ interface HeatmapChartProps {
   data?: HeatmapData[];
   title?: string;
   metric?: "growth" | "margin" | "roic" | "revenue";
+  dataSourceId?: string;
 }
 
 export function HeatmapChart({ 
-  data = mockData, 
+  data, 
   title = "Portfolio Performance Heatmap",
-  metric = "growth"
+  metric = "growth",
+  dataSourceId
 }: HeatmapChartProps) {
+  
+  // Fetch data from the data source if dataSourceId is provided
+  const { data: fetchedData, isLoading, error } = useQuery({
+    queryKey: ['/api/analytics/heatmap', dataSourceId, metric],
+    queryFn: async () => {
+      if (!dataSourceId) return null;
+      return apiRequest('POST', '/api/analytics/heatmap', {
+        dataSourceId: parseInt(dataSourceId),
+        metric
+      });
+    },
+    enabled: !!dataSourceId
+  });
+
+  const displayData = data || fetchedData?.data || mockData;
   
   const getMetricValue = (item: HeatmapData) => {
     switch (metric) {
@@ -49,11 +69,35 @@ export function HeatmapChart({
     return <Minus className="h-4 w-4" />;
   };
 
-  const values = data.map(getMetricValue);
+  const values = displayData.map(getMetricValue);
   const min = Math.min(...values);
   const max = Math.max(...values);
 
-  const sectors = Array.from(new Set(data.map(item => item.sector)));
+  const sectors = Array.from(new Set(displayData.map(item => item.sector)));
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <Alert>
+            <AlertDescription>
+              Failed to load data. Please make sure your data source contains the required columns.
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -70,7 +114,7 @@ export function HeatmapChart({
       <CardContent>
         <div className="space-y-6">
           {sectors.map(sector => {
-            const sectorCompanies = data.filter(item => item.sector === sector);
+            const sectorCompanies = displayData.filter(item => item.sector === sector);
             return (
               <div key={sector} className="space-y-2">
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-200 border-b pb-1">

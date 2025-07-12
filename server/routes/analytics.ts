@@ -115,6 +115,38 @@ analyticsRouter.post('/trends', requireAuth, async (req, res) => {
   }
 });
 
+// Heatmap data
+analyticsRouter.post('/heatmap', requireAuth, async (req, res) => {
+  try {
+    const { dataSourceId, metric } = req.body;
+    const { storage } = await import('../storage');
+    
+    const storedData = await storage.getDataSourceData(dataSourceId);
+    if (!storedData) {
+      return res.status(404).json({ error: 'Data not found' });
+    }
+    
+    const { data } = storedData;
+    
+    // Transform data for heatmap display
+    // For now, we'll try to extract company/entity data and compute metrics
+    const heatmapData = data.map((row: any, index: number) => ({
+      company: row.company || row.name || row.entity || `Entity ${index + 1}`,
+      sector: row.sector || row.category || row.type || 'General',
+      revenue: parseFloat(row.revenue) || parseFloat(row.sales) || parseFloat(row.amount) || 0,
+      ebitda: parseFloat(row.ebitda) || parseFloat(row.profit) || parseFloat(row.income) || 0,
+      growth: parseFloat(row.growth) || parseFloat(row.growth_rate) || 0,
+      margin: parseFloat(row.margin) || parseFloat(row.profit_margin) || 0,
+      roic: parseFloat(row.roic) || parseFloat(row.return_on_investment) || 0
+    }));
+    
+    res.json({ data: heatmapData });
+  } catch (error) {
+    console.error('Heatmap error:', error);
+    res.status(500).json({ error: 'Failed to generate heatmap data' });
+  }
+});
+
 // Comprehensive analysis
 analyticsRouter.post('/analyze', requireAuth, async (req, res) => {
   try {

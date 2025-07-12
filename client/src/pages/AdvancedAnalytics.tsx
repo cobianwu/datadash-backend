@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/Layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LBOAnalyzer } from "@/components/FinancialModeling/LBOAnalyzer";
@@ -14,10 +15,25 @@ import {
   Download,
   Share,
   Settings,
-  Zap
+  Zap,
+  Database
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AdvancedAnalytics() {
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string>("");
+  
+  const { data: dataSources, isLoading } = useQuery({
+    queryKey: ["/api/data-sources"],
+  });
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -47,6 +63,34 @@ export default function AdvancedAnalytics() {
           </div>
         </div>
 
+        {/* Data Source Selector */}
+        <div className="bg-background border rounded-lg p-4">
+          <div className="flex items-center gap-4">
+            <Database className="h-5 w-5 text-muted-foreground" />
+            <div className="flex-1 max-w-md">
+              <Select value={selectedDataSourceId} onValueChange={setSelectedDataSourceId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a data source to analyze" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dataSources?.map((source: any) => (
+                    <SelectItem key={source.id} value={source.id.toString()}>
+                      {source.name} ({source.type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {!isLoading && dataSources?.length === 0 && (
+              <Alert className="flex-1">
+                <AlertDescription>
+                  No data sources found. Please upload a file in the Data Sources tab first.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </div>
+
         <Tabs defaultValue="nlp" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="nlp" className="flex items-center gap-2">
@@ -68,40 +112,76 @@ export default function AdvancedAnalytics() {
           </TabsList>
 
           <TabsContent value="nlp" className="mt-6">
-            <QueryInterface />
+            {selectedDataSourceId ? (
+              <QueryInterface dataSourceId={selectedDataSourceId} />
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  Please select a data source to start analyzing with AI.
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
           <TabsContent value="lbo" className="mt-6">
-            <LBOAnalyzer />
+            {selectedDataSourceId ? (
+              <LBOAnalyzer dataSourceId={selectedDataSourceId} />
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  Please select a data source for LBO modeling.
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
           <TabsContent value="heatmap" className="mt-6">
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <HeatmapChart 
-                  title="Revenue Growth Heatmap" 
-                  metric="growth"
-                />
-                <HeatmapChart 
-                  title="EBITDA Margin Heatmap" 
-                  metric="margin"
-                />
+            {selectedDataSourceId ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <HeatmapChart 
+                    title="Revenue Growth Heatmap" 
+                    metric="growth"
+                    dataSourceId={selectedDataSourceId}
+                  />
+                  <HeatmapChart 
+                    title="EBITDA Margin Heatmap" 
+                    metric="margin"
+                    dataSourceId={selectedDataSourceId}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <HeatmapChart 
+                    title="ROIC Performance Heatmap" 
+                    metric="roic"
+                    dataSourceId={selectedDataSourceId}
+                  />
+                  <HeatmapChart 
+                    title="Revenue Scale Heatmap" 
+                    metric="revenue"
+                    dataSourceId={selectedDataSourceId}
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <HeatmapChart 
-                  title="ROIC Performance Heatmap" 
-                  metric="roic"
-                />
-                <HeatmapChart 
-                  title="Revenue Scale Heatmap" 
-                  metric="revenue"
-                />
-              </div>
-            </div>
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  Please select a data source to view performance heatmaps.
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
 
           <TabsContent value="forecast" className="mt-6">
-            <ForecastEngine />
+            {selectedDataSourceId ? (
+              <ForecastEngine dataSourceId={selectedDataSourceId} />
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  Please select a data source for predictive analytics.
+                </AlertDescription>
+              </Alert>
+            )}
           </TabsContent>
         </Tabs>
       </div>
