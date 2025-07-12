@@ -324,6 +324,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let analysisData = [];
       let columns = [];
 
+      console.log("AI Query - DataSourceId:", dataSourceId);
+      console.log("Available data sources:", Object.keys(uploadedData));
+
       // Check for data source
       let sourceAnalysis = null;
       if (dataSourceId && uploadedData[dataSourceId]) {
@@ -331,6 +334,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysisData = sourceData.data || [];
         columns = sourceData.columns || [];
         sourceAnalysis = sourceData.analysis;
+        console.log(`Found data for source ${dataSourceId}: ${analysisData.length} rows, ${columns.length} columns`);
+      } else {
+        console.log(`No data found for source ${dataSourceId}`);
+        // Try to fetch from storage if not in memory
+        if (dataSourceId) {
+          try {
+            const dataSource = await storage.getDataSource(dataSourceId);
+            if (dataSource && dataSource.filePath) {
+              console.log("Attempting to reload data from file:", dataSource.filePath);
+              const processedFile = await FileProcessor.processFile(dataSource.filePath, dataSource.fileName);
+              analysisData = processedFile.data || [];
+              columns = processedFile.columns || [];
+              
+              // Store back in memory
+              uploadedData[dataSourceId] = {
+                data: analysisData,
+                columns: columns,
+                analysis: AnalyticsEngine.performComprehensiveAnalysis(analysisData),
+                dataQuality: DataTransformer.analyzeDataQuality(analysisData)
+              };
+              (global as any).uploadedData = uploadedData;
+              console.log(`Reloaded data: ${analysisData.length} rows`);
+            }
+          } catch (error) {
+            console.error("Error reloading data:", error);
+          }
+        }
       }
 
       // Use analytics engine to generate smart query
