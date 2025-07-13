@@ -222,6 +222,7 @@ export class IntelligentDataParser {
   }
 
   private static detectUnit(header: string, values: any[]): string {
+    if (!header) return '';
     const headerLower = header.toLowerCase();
     
     if (headerLower.includes('$') || headerLower.includes('usd') || headerLower.includes('dollar')) {
@@ -250,6 +251,7 @@ export class IntelligentDataParser {
   }
 
   private static detectFormat(header: string, values: any[], unit: string): string {
+    if (!header) return '0,0';
     if (unit === '%') {
       return '0.1%';
     }
@@ -271,6 +273,7 @@ export class IntelligentDataParser {
   }
 
   private static standardizeColumnName(original: string, type: string): string {
+    if (!original) return 'unknown_column';
     const lower = original.toLowerCase();
     
     // Map to standard names
