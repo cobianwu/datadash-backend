@@ -385,8 +385,8 @@ The architecture prioritizes developer experience with TypeScript throughout, ho
 
 ### Deployment Readiness
 The application is ready for deployment with the following considerations:
-- **Database**: Using Neon PostgreSQL (cloud-based, production-ready)
-- **Authentication**: Working with demo user (demo/demo)
+- **Database**: PostgreSQL (compatible with Neon/Supabase/standard PostgreSQL)
+- **Authentication**: Session-based with PostgreSQL storage in production
 - **API Integration**: OpenAI GPT-4o configured and functional
 - **File Processing**: Real CSV/Excel/JSON parsing implemented
 - **AI Analysis**: Natural language queries process actual uploaded data
@@ -394,6 +394,30 @@ The application is ready for deployment with the following considerations:
 - **Optional Services**: Redis, DuckDB, and Bull queues gracefully degrade if unavailable
 - **Real-time Features**: Socket.io for collaboration (requires sticky sessions in production)
 - **Background Jobs**: Bull queue for async processing (requires Redis in production)
+
+### Recent Changes (Jan 13, 2025) - Production Deployment Configuration
+#### Database Connection Updates
+- **Migrated from Neon to standard PostgreSQL**: Updated `server/db.ts` to use standard `pg` driver
+- **SSL Configuration**: Added production SSL settings with `rejectUnauthorized: false` for cloud providers
+- **Connection Pooling**: Configured with max 10 connections and proper timeouts
+
+#### Authentication Improvements
+- **Persistent Sessions**: Implemented PostgreSQL-based session storage for production (`connect-pg-simple`)
+- **Cookie Security**: Enabled secure cookies and proxy trust for HTTPS deployments
+- **Session Table**: Auto-creates 'sessions' table on first run
+- **Environment Detection**: Automatically switches between memory store (dev) and PostgreSQL store (production)
+
+#### Environment Variables Required
+```bash
+DATABASE_URL=postgresql://[user]:[password]@[host]:[port]/[database]
+NODE_ENV=production
+SESSION_SECRET=your-very-secure-random-string-here
+OPENAI_API_KEY=your-openai-api-key
+```
+
+#### Demo User Setup
+Created helper script at `scripts/create-demo-user.js` to generate password hash for demo user.
+Run locally and execute generated SQL in your database to create demo user.
 
 ### Testing Instructions
 1. **Login**: Use demo/demo credentials

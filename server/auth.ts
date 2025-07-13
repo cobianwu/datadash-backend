@@ -5,25 +5,38 @@ import bcrypt from "bcrypt";
 import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
 import MemoryStore from "memorystore";
+import ConnectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 
 const MemoryStoreSession = MemoryStore(session);
+const PgStore = ConnectPgSimple(session);
 
 // Configure session store
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const isProduction = process.env.NODE_ENV === 'production';
   
-  const sessionStore = new MemoryStoreSession({
-    checkPeriod: 86400000, // prune expired entries every 24h
-  });
+  // Use PostgreSQL store in production, memory store in development
+  const sessionStore = isProduction
+    ? new PgStore({
+        pool: pool,
+        tableName: 'sessions',
+        createTableIfMissing: true,
+      })
+    : new MemoryStoreSession({
+        checkPeriod: 86400000, // prune expired entries every 24h
+      });
   
   return session({
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    proxy: isProduction, // Trust proxy in production (important for Render)
     cookie: {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // HTTPS only in production
+      sameSite: isProduction ? 'strict' : 'lax',
       maxAge: sessionTtl,
     },
   });

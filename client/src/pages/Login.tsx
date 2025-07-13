@@ -15,9 +15,9 @@ export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    username: "demo",
+    username: "",
     email: "",
-    password: "demo",
+    password: "",
   });
   const { toast } = useToast();
 
@@ -79,11 +79,7 @@ export default function Login() {
               : "Get started with DataFlow Analytics"
             }
           </CardDescription>
-          {isLogin && (
-            <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm text-blue-600 dark:text-blue-400">
-              Demo credentials: username: <strong>demo</strong>, password: <strong>demo</strong>
-            </div>
-          )}
+
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
