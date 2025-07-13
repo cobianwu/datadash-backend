@@ -109,6 +109,7 @@ export class IntelligentDataParser {
       data[sheetName] = rows.map(row => {
         const obj: any = {};
         headers.forEach((header, idx) => {
+          if (!header) return; // Skip null headers
           const mapping = sheetMeta.columns.find(col => col.originalName === header);
           const key = mapping ? mapping.standardName : header;
           obj[key] = this.parseValue(row[idx], mapping?.type);
@@ -153,6 +154,7 @@ export class IntelligentDataParser {
     
     // Analyze columns
     headers.forEach((header, idx) => {
+      if (!header) return; // Skip null headers
       const columnType = this.detectColumnType(header, sampleRows.map(row => row[idx]));
       const mapping: ColumnMapping = {
         originalName: header,
@@ -181,6 +183,7 @@ export class IntelligentDataParser {
     unit?: string;
     format?: string;
   } {
+    if (!header) return { type: 'dimension' }; // Default for null headers
     const headerLower = header.toLowerCase();
     
     // Check for date columns
