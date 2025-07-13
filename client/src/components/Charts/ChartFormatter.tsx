@@ -500,10 +500,23 @@ export function ChartFormatter({ config, onChange, availableMetrics = [] }: Char
 }
 
 // Utility function to format numbers based on ChartFormat
-export function formatNumber(value: number, format: ChartFormat): string {
+export function formatNumber(value: number, format?: ChartFormat): string {
   if (value == null || isNaN(value)) return 'N/A';
+  
+  // Provide default format if not provided
+  if (!format) {
+    format = {
+      numberFormat: '0,0',
+      unit: '',
+      prefix: '',
+      suffix: '',
+      decimals: 0,
+      abbreviate: false
+    };
+  }
 
   let formatted = value;
+  let dynamicSuffix = format.suffix || '';
   
   // Apply abbreviation if needed
   if (format.abbreviate && Math.abs(value) >= 1000) {
@@ -511,7 +524,7 @@ export function formatNumber(value: number, format: ChartFormat): string {
     const unitIndex = Math.floor(Math.log10(Math.abs(value)) / 3);
     const unitValue = value / Math.pow(1000, unitIndex);
     formatted = unitValue;
-    format.suffix = (format.suffix || '') + units[Math.min(unitIndex, units.length - 1)];
+    dynamicSuffix = dynamicSuffix + units[Math.min(unitIndex, units.length - 1)];
   }
 
   // Apply number format

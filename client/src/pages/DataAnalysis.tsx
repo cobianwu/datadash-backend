@@ -19,7 +19,7 @@ import {
   BarChart, Bar, LineChart as RechartsLineChart, Line, PieChart as RechartsPieChart, 
   Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
   AreaChart, Area, ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, 
-  PolarRadiusAxis, Radar, Treemap
+  PolarRadiusAxis, Radar, Treemap, LabelList
 } from "recharts";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -382,30 +382,80 @@ export default function DataAnalysis() {
       <ResponsiveContainer width="100%" height="100%">
         {chartType === "bar" && (
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={chartConfig.xAxis.showGrid ? "#e5e7eb" : "transparent"} />
+            <XAxis 
+              dataKey="name" 
+              hide={!chartConfig.xAxis.showAxis}
+              label={{ value: chartConfig.xAxis.label, position: 'insideBottom', offset: -5 }}
+            />
+            <YAxis 
+              hide={!chartConfig.yAxis.showAxis}
+              label={{ value: chartConfig.yAxis.label, angle: -90, position: 'insideLeft' }}
+              tickFormatter={(value) => formatNumber(value, chartConfig.yAxis.format)}
+            />
+            <Tooltip 
+              formatter={(value: any) => formatNumber(value, chartConfig.yAxis.format)}
+              labelFormatter={(label) => `${chartConfig.xAxis.label}: ${label}`}
+            />
             <Legend />
-            <Bar dataKey="value" fill="#3b82f6" />
+            <Bar dataKey="value" fill="#3b82f6">
+              {chartConfig.showDataLabels && (
+                <LabelList 
+                  dataKey="value" 
+                  position="top" 
+                  formatter={(value: any) => formatNumber(value, chartConfig.dataLabelFormat)}
+                />
+              )}
+            </Bar>
           </BarChart>
         )}
         {chartType === "line" && (
           <RechartsLineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={chartConfig.xAxis.showGrid ? "#e5e7eb" : "transparent"} />
+            <XAxis 
+              dataKey="name" 
+              hide={!chartConfig.xAxis.showAxis}
+              label={{ value: chartConfig.xAxis.label, position: 'insideBottom', offset: -5 }}
+            />
+            <YAxis 
+              hide={!chartConfig.yAxis.showAxis}
+              label={{ value: chartConfig.yAxis.label, angle: -90, position: 'insideLeft' }}
+              tickFormatter={(value) => formatNumber(value, chartConfig.yAxis.format)}
+            />
+            <Tooltip 
+              formatter={(value: any) => formatNumber(value, chartConfig.yAxis.format)}
+              labelFormatter={(label) => `${chartConfig.xAxis.label}: ${label}`}
+            />
             <Legend />
-            <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} />
+            <Line 
+              type="monotone" 
+              dataKey="value" 
+              stroke="#3b82f6" 
+              strokeWidth={2}
+              label={chartConfig.showDataLabels ? {
+                position: 'top',
+                formatter: (value: any) => formatNumber(value, chartConfig.dataLabelFormat)
+              } : false}
+            />
           </RechartsLineChart>
         )}
         {chartType === "area" && (
           <AreaChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke={chartConfig.xAxis.showGrid ? "#e5e7eb" : "transparent"} />
+            <XAxis 
+              dataKey="name" 
+              hide={!chartConfig.xAxis.showAxis}
+              label={{ value: chartConfig.xAxis.label, position: 'insideBottom', offset: -5 }}
+            />
+            <YAxis 
+              hide={!chartConfig.yAxis.showAxis}
+              label={{ value: chartConfig.yAxis.label, angle: -90, position: 'insideLeft' }}
+              tickFormatter={(value) => formatNumber(value, chartConfig.yAxis.format)}
+            />
+            <Tooltip 
+              formatter={(value: any) => formatNumber(value, chartConfig.yAxis.format)}
+              labelFormatter={(label) => `${chartConfig.xAxis.label}: ${label}`}
+            />
             <Legend />
             <Area type="monotone" dataKey="value" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
           </AreaChart>
