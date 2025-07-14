@@ -1,0 +1,81 @@
+==> Cloning from https://github.com/cobianwu/datadash-backend
+==> Checking out commit 368d79e09be0ca7c26d3a6f04fe3e75f2a7f9e09 in branch main
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install --include=dev && npm run build'...
+added 786 packages, and audited 787 packages in 16s
+81 packages are looking for funding
+  run `npm fund` for details
+10 vulnerabilities (1 low, 8 moderate, 1 high)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+Some issues need review, and may require choosing
+a different dependency.
+Run `npm audit` for details.
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 3233 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                                      0.63 kB │ gzip:   0.38 kB
+../dist/public/assets/index-D8c74MFR.css                      97.44 kB │ gzip:  15.54 kB
+../dist/public/assets/__vite-browser-external-BIHI7g3E.js      0.03 kB │ gzip:   0.05 kB
+../dist/public/assets/purify.es-BFmuJLeH.js                   21.93 kB │ gzip:   8.62 kB
+../dist/public/assets/index.es-CoX-d5wm.js                   150.53 kB │ gzip:  51.48 kB
+../dist/public/assets/index-DaOs6hEQ.js                    2,359.18 kB │ gzip: 708.34 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 11.36s
+  dist/index.js  178.9kb
+⚡ Done in 11ms
+==> Uploading build...
+==> Uploaded in 7.7s. Compression took 5.1s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Database connection configured for production
+DuckDB not available
+Redis service initialized
+DuckDB service initialized
+6:49:54 AM [express] serving on port 10000
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://datadash-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+6:50:24 AM [express] GET /api/auth/user 401 in 3ms :: {"message":"Not authenticated"}
+🔐 LOGIN ATTEMPT: admin
+❌ LOGIN ERROR: Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:637:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:847:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788',
+  port: 5432
+}
+6:50:38 AM [express] POST /api/auth/login 500 in 27ms :: {"message":"connect ENETUNREACH 2600:1f1c:f…
+Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:637:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:847:22)
