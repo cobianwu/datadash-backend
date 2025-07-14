@@ -38,14 +38,11 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Standard PostgreSQL pool configuration that works with Supabase
+// For Supabase pooler, use simplified SSL configuration
 export const pool = new Pool({ 
   connectionString: connectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { 
-    rejectUnauthorized: false,
-    // Required for Supabase pooler connections
-    require: true,
-    servername: 'aws-0-us-east-1.pooler.supabase.com'
-  } : false,
+  // Supabase pooler requires this specific SSL setting
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000
