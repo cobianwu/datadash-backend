@@ -1,8 +1,9 @@
 import { Redis } from '@upstash/redis';
 
+// Initialize Redis client using environment variables
 const redis = new Redis({
-  url: 'https://ready-lark-51766.upstash.io',
-  token: process.env.UPSTASH_REDIS_Aco2AAIjcDFlNGQyZjBhYzcxZTQ0NDE0OWNjZTQ2ZTBkZWM2YmVjYnAxMA!,
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
 export class RedisService {
@@ -51,13 +52,11 @@ export class RedisService {
   }
 
   async getSession(sessionId: string): Promise<any> {
-    const key = `session:${sessionId}`;
-    return await this.get(key);
+    return await this.get(`session:${sessionId}`);
   }
 
   async setSession(sessionId: string, data: any, ttl: number = 86400): Promise<boolean> {
-    const key = `session:${sessionId}`;
-    return await this.set(key, data, ttl);
+    return await this.set(`session:${sessionId}`, data, ttl);
   }
 
   async getCachedQuery(queryHash: string): Promise<any> {
