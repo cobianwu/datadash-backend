@@ -14,19 +14,19 @@ const PgStore = ConnectPgSimple(session);
 // Configure session store
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const isProduction = process.env.NODE_ENV === 'production';
-  
+  const isProduction = process.env.NODE_ENV === "production";
+
   // Use PostgreSQL store in production, memory store in development
   const sessionStore = isProduction
     ? new PgStore({
         pool: pool,
-        tableName: 'sessions',
+        tableName: "sessions",
         createTableIfMissing: true,
       })
     : new MemoryStoreSession({
         checkPeriod: 86400000, // prune expired entries every 24h
       });
-  
+
   return session({
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
     store: sessionStore,
@@ -36,7 +36,7 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: isProduction, // HTTPS only in production
-      sameSite: isProduction ? 'strict' : 'lax',
+      sameSite: isProduction ? "strict" : "lax",
       maxAge: sessionTtl,
     },
   });
@@ -48,25 +48,35 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  passport.use(new LocalStrategy(
-    async (username: string, password: string, done) => {
+  passport.use(
+    new LocalStrategy(async (username: string, password: string, done) => {
       try {
+        console.log("🔐 LOGIN ATTEMPT:", username);
+
         const user = await storage.getUserByUsername(username);
+        console.log("🔎 USER FOUND:", user);
+
         if (!user) {
+          console.warn("⚠️ No user found");
           return done(null, false, { message: "Invalid username or password" });
         }
 
         const isValid = await bcrypt.compare(password, user.passwordHash);
+        console.log("✅ PASSWORD MATCH:", isValid);
+
         if (!isValid) {
+          console.warn("⚠️ Password does not match");
           return done(null, false, { message: "Invalid username or password" });
         }
 
+        console.log("🎉 LOGIN SUCCESS");
         return done(null, user);
       } catch (error) {
+        console.error("❌ LOGIN ERROR:", error);
         return done(error);
       }
-    }
-  ));
+    }),
+  );
 
   passport.serializeUser((user: any, done) => {
     done(null, user.id);
