@@ -1,0 +1,46 @@
+==> Deploying...
+==> Running 'npm run start'
+> rest-express@1.0.0 start
+> NODE_ENV=production node dist/index.js
+Original DATABASE_URL host: db.uveysvjirebyppbzwwuw.supabase.co
+Database connection configured for production, host: db.uveysvjirebyppbzwwuw.supabase.co
+DuckDB not available
+Redis service initialized
+DuckDB service initialized
+6:54:08 AM [express] serving on port 10000
+     [GET]200datadash-backend.onrender.com/clientIP="34.168.108.203" requestID="ccc4908a-ff59-4ced" responseTimeMS=3 responseBytes=646 userAgent="Go-http-client/2.0"
+     ==> Your service is live 🎉
+     ==> 
+     ==> ///////////////////////////////////////////////////////////
+     ==> 
+     ==> Available at your primary URL https://datadash-backend.onrender.com
+     ==> 
+     ==> ///////////////////////////////////////////////////////////
+     [GET]200datadash-backend.onrender.com/clientIP="108.85.15.227" requestID="c2e36866-b3b1-4419" responseTimeMS=7 responseBytes=646 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]200datadash-backend.onrender.com/assets/index-DaOs6hEQ.jsclientIP="108.85.15.227" requestID="500bf05e-5323-45df" responseTimeMS=339 responseBytes=699353 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]200datadash-backend.onrender.com/favicon.icoclientIP="108.85.15.227" requestID="ba09cdc3-d2ee-48b3" responseTimeMS=3 responseBytes=646 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]401datadash-backend.onrender.com/api/auth/userclientIP="108.85.15.227" requestID="7c1031f3-88d4-45d0" responseTimeMS=3 responseBytes=306 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]200datadash-backend.onrender.com/assets/index-D8c74MFR.cssclientIP="108.85.15.227" requestID="34e6da55-bfef-421d" responseTimeMS=10 responseBytes=15974 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+6:55:26 AM [express] GET /api/auth/user 401 in 2ms :: {"message":"Not authenticated"}
+     [GET]304datadash-backend.onrender.com/favicon.icoclientIP="108.85.15.227" requestID="9c7ee731-4dcb-4b7a" responseTimeMS=2 responseBytes=266 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+🔐 LOGIN ATTEMPT: admin
+❌ LOGIN ERROR: Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:639:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:849:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788',
+  port: 5432
+}
+6:55:38 AM [express] POST /api/auth/login 500 in 28ms :: {"message":"connect ENETUNREACH 2600:1f1c:f…
+Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:639:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:849:22)
+     [POST]500datadash-backend.onrender.com/api/auth/loginclientIP="108.85.15.227" requestID="2b4d8318-adce-4cc0" responseTimeMS=38 responseBytes=352 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"

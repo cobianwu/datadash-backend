@@ -38,12 +38,28 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Standard PostgreSQL pool configuration that works with Supabase
-export const pool = new Pool({ 
-  connectionString: connectionString,
+// Force IPv4 by using direct connection parameters instead of connection string
+const dbUrl = new URL(connectionString);
+const poolConfig: any = {
+  host: dbUrl.hostname,
+  port: parseInt(dbUrl.port || '5432'),
+  database: dbUrl.pathname.slice(1),
+  user: dbUrl.username,
+  password: dbUrl.password,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
-});
+};
+
+// In production, add a custom DNS lookup to force IPv4
+if (process.env.NODE_ENV === 'production') {
+  const dns = require('dns');
+  poolConfig.lookup = (hostname: string, options: any, callback: any) => {
+    dns.lookup(hostname, 4, callback); // Force IPv4 (family: 4)
+  };
+}
+
+export const pool = new Pool(poolConfig);
 
 export const db = drizzle(pool, { schema });
