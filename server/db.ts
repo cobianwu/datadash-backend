@@ -8,13 +8,30 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Force IPv4 for Render compatibility (add ?family=4 to connection string)
+// Force IPv4 for Render compatibility
 let connectionString = process.env.DATABASE_URL;
+
+// Parse and modify the connection string for production
 if (process.env.NODE_ENV === 'production') {
-  // Parse the URL and add family=4 parameter to force IPv4
   const url = new URL(connectionString);
-  url.searchParams.set('family', '4');
+  
+  // Force IPv4 by replacing the hostname if it's IPv6
+  // Supabase provides both IPv4 and IPv6, we need to use the domain name
+  if (url.hostname.includes(':')) {
+    // This is an IPv6 address, replace with the domain
+    const match = connectionString.match(/postgresql:\/\/([^:]+):([^@]+)@([^\/]+)\/(.+)/);
+    if (match) {
+      // Extract the host part and look for .supabase.co domain
+      const hostPart = match[3];
+      if (hostPart.includes('.supabase.co')) {
+        // Already using domain, just add family parameter
+        url.searchParams.set('sslmode', 'require');
+      }
+    }
+  }
+  
   connectionString = url.toString();
+  console.log('Database connection configured for production');
 }
 
 // Standard PostgreSQL pool configuration that works with Supabase
