@@ -42,14 +42,13 @@ export const pool = new Pool({
   connectionString: connectionString,
   ssl: process.env.NODE_ENV === 'production' ? { 
     rejectUnauthorized: false,
-    // Force TLS 1.2 which may help with IPv6 issues
-    minVersion: 'TLSv1.2'
+    // Required for Supabase pooler connections
+    require: true,
+    servername: 'aws-0-us-east-1.pooler.supabase.com'
   } : false,
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  // Add connection string options to force behavior
-  options: '-c ssl_sni=1'
+  connectionTimeoutMillis: 10000
 });
 
 export const db = drizzle(pool, { schema });
