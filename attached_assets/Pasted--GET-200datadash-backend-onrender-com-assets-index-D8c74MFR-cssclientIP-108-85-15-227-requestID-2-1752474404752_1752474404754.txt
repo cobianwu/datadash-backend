@@ -1,0 +1,70 @@
+[GET]200datadash-backend.onrender.com/assets/index-D8c74MFR.cssclientIP="108.85.15.227" requestID="20caf17c-888b-403e" responseTimeMS=8 responseBytes=15974 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]200datadash-backend.onrender.com/assets/index-DaOs6hEQ.jsclientIP="108.85.15.227" requestID="b3c43988-ffc1-4e56" responseTimeMS=112 responseBytes=699353 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]200datadash-backend.onrender.com/clientIP="108.85.15.227" requestID="6bf2fa31-a84e-4f4b" responseTimeMS=6 responseBytes=646 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]401datadash-backend.onrender.com/api/auth/userclientIP="108.85.15.227" requestID="cdb5a04d-5616-49de" responseTimeMS=4 responseBytes=306 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+     [GET]200datadash-backend.onrender.com/favicon.icoclientIP="108.85.15.227" requestID="2f88ff97-9414-450f" responseTimeMS=3 responseBytes=646 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+6:24:00 AM [express] GET /api/auth/user 401 in 3ms :: {"message":"Not authenticated"}
+     [GET]304datadash-backend.onrender.com/favicon.icoclientIP="108.85.15.227" requestID="12c0329a-7cf3-4630" responseTimeMS=3 responseBytes=266 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+🔐 LOGIN ATTEMPT: admin
+❌ LOGIN ERROR: Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:622:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:832:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788',
+  port: 5432
+}
+     [POST]500datadash-backend.onrender.com/api/auth/loginclientIP="108.85.15.227" requestID="094dafe4-b0d5-4ad9" responseTimeMS=58 responseBytes=352 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+6:24:27 AM [express] POST /api/auth/login 500 in 49ms :: {"message":"connect ENETUNREACH 2600:1f1c:f…
+Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:622:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:832:22)
+     [POST]500datadash-backend.onrender.com/api/auth/loginclientIP="108.85.15.227" requestID="9580722a-c47f-4216" responseTimeMS=6 responseBytes=352 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+🔐 LOGIN ATTEMPT: admin
+❌ LOGIN ERROR: Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:622:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:832:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788',
+  port: 5432
+}
+6:24:31 AM [express] POST /api/auth/login 500 in 4ms :: {"message":"connect ENETUNREACH 2600:1f1c:f9…
+Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:622:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:832:22)
+     [POST]500datadash-backend.onrender.com/api/auth/loginclientIP="108.85.15.227" requestID="55afc8cb-4c4a-48ac" responseTimeMS=8 responseBytes=352 userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36 Edg/137.0.0.0"
+🔐 LOGIN ATTEMPT: demo
+❌ LOGIN ERROR: Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:622:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:832:22) {
+  errno: -101,
+  code: 'ENETUNREACH',
+  syscall: 'connect',
+  address: '2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788',
+  port: 5432
+}
+6:24:40 AM [express] POST /api/auth/login 500 in 6ms :: {"message":"connect ENETUNREACH 2600:1f1c:f9…
+Error: connect ENETUNREACH 2600:1f1c:f9:4d0f:994d:3ee1:4fba:d788:5432 - Local (:::0)
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///opt/render/project/src/node_modules/drizzle-orm/node-postgres/session.js:83:22
+    at async DatabaseStorage.getUserByUsername (file:///opt/render/project/src/dist/index.js:622:24)
+    at async Strategy._verify (file:///opt/render/project/src/dist/index.js:832:22)

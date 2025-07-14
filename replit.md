@@ -400,6 +400,7 @@ The application is ready for deployment with the following considerations:
 - **Migrated from Neon to standard PostgreSQL**: Updated `server/db.ts` to use standard `pg` driver
 - **SSL Configuration**: Added production SSL settings with `rejectUnauthorized: false` for cloud providers
 - **Connection Pooling**: Configured with max 10 connections and proper timeouts
+- **IPv4 Forcing**: Added URL parsing to force IPv4 connections (family=4) for Render compatibility
 
 #### Authentication Improvements
 - **Persistent Sessions**: Implemented PostgreSQL-based session storage for production (`connect-pg-simple`)

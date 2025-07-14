@@ -8,9 +8,18 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// Force IPv4 for Render compatibility (add ?family=4 to connection string)
+let connectionString = process.env.DATABASE_URL;
+if (process.env.NODE_ENV === 'production') {
+  // Parse the URL and add family=4 parameter to force IPv4
+  const url = new URL(connectionString);
+  url.searchParams.set('family', '4');
+  connectionString = url.toString();
+}
+
 // Standard PostgreSQL pool configuration that works with Supabase
 export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 10,
   idleTimeoutMillis: 30000,
